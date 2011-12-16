@@ -23,12 +23,13 @@ public class vymazhraca extends ListActivity {
 	private OnItemClickListener piker;
 	private String vysledok;
 	private Trening trening;
+	private int RESULT_REMOVE=-1;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	  super.onCreate(savedInstanceState);
 	  vysledok= new String();
-	  vysledok="del";
+	  //vysledok="del";
 	  result = new ArrayList<String>();
 	  piker = new OnItemClickListener() {
 		    public void onItemClick(AdapterView<?> parent, View view,
@@ -39,7 +40,7 @@ public class vymazhraca extends ListActivity {
 			          Toast.LENGTH_SHORT).show();
 			      String item= new String((String) ((TextView) view).getText());
 			      if (item.equals("Koniec")) {
-			    	  setResult(RESULT_OK, (new Intent()).setAction(vysledok));
+			    	  setResult(RESULT_REMOVE, (new Intent()).setAction(vysledok));
 			          finish();  
 			      }
 			      else {
