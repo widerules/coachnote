@@ -3,58 +3,47 @@ package sk.mato.kuchy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class pridajhraca extends ListActivity {
-	// musim uplne prekodit ten GUI
+public class pridajhraca extends Activity {
+
 	private ArrayList<Hrac> hracilist;
-	private ArrayList<String> hraciMena;
-	private ArrayList<String> result;
 	private OnItemClickListener piker;
 	private String vysledok;
-	private int GET_CODE = 0;
-	private int RESULT_ADD = 1; // 1 znaci ze pridavam
+	private int GET_CODE = 0; // pre vytvorenie hraca co nieje v DB
+	private int RESULT_ADD = 1; // 1 znaci ze pridavam pre
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		setContentView(R.layout.pridajhraca);
+
 		super.onCreate(savedInstanceState);
 		vysledok = new String();
-		result = new ArrayList<String>();
 		piker = new OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				Toast.makeText(
 						getApplicationContext(),
-						((TextView) view).getText()
+						hracilist.get(position).getMeno() + " "
+								+ hracilist.get(position).getPriezvisko()
 								+ " bol/a pridany na tento trening",
 						Toast.LENGTH_SHORT).show();
-				String item = new String((String) ((TextView) view).getText());
-				if (item.equals("Pridaj noveho hraca co nieje v DB")) {
-					Intent intent = new Intent(pridajhraca.this, novyhrac.class);
-					startActivityForResult(intent, GET_CODE);
-
-				}
-
-				if (item.equals("Koniec")) {
-					setResult(RESULT_ADD, (new Intent()).setAction(vysledok));
-					finish();
-				} else {
-
-					result.add(item);
-					vysledok += item;
-				}
-
+				vysledok += hracilist.get(position).getMeno() + " "
+						+ hracilist.get(position).getPriezvisko() + "\n";
 			}
 		};
 
@@ -67,23 +56,50 @@ public class pridajhraca extends ListActivity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// vybranie mien
-		hraciMena = new ArrayList<String>();
-		hraciMena.add("Koniec");
+		// list View
+		ListView lv = (ListView) findViewById(R.id.listview);
 
-		hraciMena.add("Pridaj noveho hraca co nieje v DB");
-		for (Hrac s : hracilist) {
-			hraciMena.add(s.getMeno() + " " + s.getPriezvisko() + "\n");
+		String[] from = new String[] { "id", "meno", "priez", "vek", "res" };
+		int[] to = new int[] { R.id.item1, R.id.item2, R.id.item3, R.id.item4,
+				R.id.item5 };
+
+		List<HashMap<String, String>> fillMaps = new ArrayList<HashMap<String, String>>();
+		for (int j = 0; j < hracilist.size(); j++) {
+			HashMap<String, String> map = new HashMap<String, String>();
+			map.put("id", "" + j);
+			map.put("meno", hracilist.get(j).getMeno());
+			map.put("priez", hracilist.get(j).getPriezvisko());
+			map.put("vek", hracilist.get(j).getVek() + "");
+			map.put("res", hracilist.get(j).getRespekt() + "");
+			fillMaps.add(map);
 		}
 
-		setListAdapter(new ArrayAdapter<String>(this, R.layout.add_hrac,
-				hraciMena));
-
-		ListView lv = getListView();
-		lv.setTextFilterEnabled(true);
-
+		SimpleAdapter adapter = new SimpleAdapter(this, fillMaps,
+				R.layout.add_hrac, from, to);
+		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(piker);
 
+		// koniec Button
+		Button koniec = (Button) findViewById(R.id.koniec);
+		koniec.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				setResult(RESULT_ADD, (new Intent()).setAction(vysledok));
+				finish();
+			}
+		});
+
+		// pridaj noveho hraca Button
+		Button novyH = (Button) findViewById(R.id.novyH);
+		novyH.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(pridajhraca.this, novyhrac.class);
+				startActivityForResult(intent, GET_CODE);
+			}
+		});
 	}
 
 	@Override
@@ -91,60 +107,19 @@ public class pridajhraca extends ListActivity {
 		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
 		vysledok = new String();
-		vysledok = "add"; // asi by bolo vhodne totok nahradit GET_CODE-dom
-		result = new ArrayList<String>();
 		piker = new OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				Toast.makeText(
 						getApplicationContext(),
-						((TextView) view).getText()
+						hracilist.get(position).getMeno() + " "
+								+ hracilist.get(position).getPriezvisko()
 								+ " bol/a pridany na tento trening",
 						Toast.LENGTH_SHORT).show();
-				String item = new String((String) ((TextView) view).getText());
-
-				if (item.equals("Novy hrac!")) {
-					Intent intent = new Intent(pridajhraca.this, novyhrac.class);
-					startActivityForResult(intent, GET_CODE);
-				}
-
-				if (item.equals("Koniec")) {
-					setResult(RESULT_OK, (new Intent()).setAction(vysledok));
-					finish();
-				} else {
-
-					result.add(item);
-					vysledok += item;
-				}
-
+				vysledok += hracilist.get(position).getMeno() + " "
+						+ hracilist.get(position).getPriezvisko() + "\n";
 			}
 		};
-
-		// nacitanie hracov
-
-		try {
-			InputStream dbhracov = openFileInput("hraci.xml");
-			hracilist = OXml.nacitajHracov(dbhracov);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// vybranie mien
-		hraciMena = new ArrayList<String>();
-		hraciMena.add("Koniec");
-		hraciMena.add("Pridaj noveho hraca co nieje v DB");
-		for (Hrac s : hracilist) {
-			hraciMena.add(s.getMeno() + " " + s.getPriezvisko() + "\n");
-		}
-
-		setListAdapter(new ArrayAdapter<String>(this, R.layout.add_hrac,
-				hraciMena));
-
-		ListView lv = getListView();
-		lv.setTextFilterEnabled(true);
-
-		lv.setOnItemClickListener(piker);
 	}
-
 }

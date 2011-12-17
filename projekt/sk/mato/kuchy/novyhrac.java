@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.KeyEvent;

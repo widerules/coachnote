@@ -1,86 +1,123 @@
 package sk.mato.kuchy;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-
-import android.app.ListActivity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
-
-public class vymazhraca extends ListActivity {	
-	
-	private ArrayList<Hrac> hracilist;
-	private ArrayList<String> hraciMena;
-	private ArrayList<String> result;
-	private OnItemClickListener piker;
-	private String vysledok;
-	private Trening trening;
-	private int RESULT_REMOVE=-1;
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-	  super.onCreate(savedInstanceState);
-	  vysledok= new String();
-	  //vysledok="del";
-	  result = new ArrayList<String>();
-	  piker = new OnItemClickListener() {
-		    public void onItemClick(AdapterView<?> parent, View view,
-			        int position, long id) {
-			    
-			      // When clicked, show a toast with the TextView text
-			      Toast.makeText(getApplicationContext(), ((TextView) view).getText()+" bol/a vyhodeny z tohoto treningu",
-			          Toast.LENGTH_SHORT).show();
-			      String item= new String((String) ((TextView) view).getText());
-			      if (item.equals("Koniec")) {
-			    	  setResult(RESULT_REMOVE, (new Intent()).setAction(vysledok));
-			          finish();  
-			      }
-			      else {
-			    	 
-			      result.add(item);
-			      vysledok+= item;  
-			      }
-			      
-			      
-			    }
-			  };
-	  
-	  //nacitanie hracov 
-	  
-	  try {
-		InputStream dbhracov=openFileInput("hraci.xml");
+/*private int RESULT_REMOVE=-1;
+ * 
+ * 	 InputStream dbhracov=openFileInput("hraci.xml");
 		InputStream  akt=openFileInput("trening.xml");
 		trening= OXml.nacitajTrening(akt, OXml.nacitajHracov(dbhracov));
 		hracilist= trening.getHracov();
-		//hracilist= xml.nacitajHracov(dbhracov);
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-		finish();
-	}
-	 //vybranie mien
-	hraciMena = new ArrayList<String>();
-	hraciMena.add("Koniec");
-	for (Hrac s : hracilist) {
-		hraciMena.add(s.getMeno()+" "+ s.getPriezvisko()+"\n");
-	}	
+ */
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+
+public class vymazhraca extends Activity {
 	
-	setListAdapter(new ArrayAdapter<String>(this, R.layout.del_hrac, hraciMena));
+	private ArrayList<Hrac> hracilist;
+	private OnItemClickListener piker;
+	private String vysledok;
+	private int RESULT_REMOVE=-1; // -1 znaci ze vymazavam pre nad-activity
 
-	  ListView lv = getListView();
-	  lv.setTextFilterEnabled(true);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		setContentView(R.layout.vymazhraca);
 
-	  lv.setOnItemClickListener(piker);
-	  
+		super.onCreate(savedInstanceState);
+		vysledok = new String();
+		piker = new OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Toast.makeText(
+						getApplicationContext(),
+						hracilist.get(position).getMeno() + " "
+								+ hracilist.get(position).getPriezvisko()
+								+ " bol/a pridany na tento trening",
+						Toast.LENGTH_SHORT).show();
+				vysledok += hracilist.get(position).getMeno() + " "
+						+ hracilist.get(position).getPriezvisko()+"\n";
+			}
+		};
+
+		// nacitanie hracov
+
+		try {
+			InputStream dbhracov=openFileInput("hraci.xml");
+			InputStream  akt=openFileInput("trening.xml");
+			Trening trening= OXml.nacitajTrening(akt, OXml.nacitajHracov(dbhracov));
+			hracilist= trening.getHracov();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// list View
+		ListView lv = (ListView) findViewById(R.id.listview);
+
+		String[] from = new String[] { "id", "meno", "priez", "vek", "res" };
+		int[] to = new int[] { R.id.item1, R.id.item2, R.id.item3, R.id.item4,
+				R.id.item5 };
+
+		List<HashMap<String, String>> fillMaps = new ArrayList<HashMap<String, String>>();
+		for (int j = 0; j < hracilist.size(); j++) {
+			HashMap<String, String> map = new HashMap<String, String>();
+			map.put("id", "" + j);
+			map.put("meno", hracilist.get(j).getMeno());
+			map.put("priez", hracilist.get(j).getPriezvisko());
+			map.put("vek", hracilist.get(j).getVek() + "");
+			map.put("res", hracilist.get(j).getRespekt() + "");
+			fillMaps.add(map);
+		}
+
+		SimpleAdapter adapter = new SimpleAdapter(this, fillMaps,
+				R.layout.add_hrac, from, to);
+		lv.setAdapter(adapter);
+		lv.setOnItemClickListener(piker);
+
+		// koniec Button
+		Button koniec = (Button) findViewById(R.id.koniec);
+		koniec.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				setResult(RESULT_REMOVE, (new Intent()).setAction(vysledok));
+				finish();
+			}
+		});
+		
 	}
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		super.onActivityResult(requestCode, resultCode, data);
+		vysledok = new String();
+		piker = new OnItemClickListener() {
 
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Toast.makeText(
+						getApplicationContext(),
+						hracilist.get(position).getMeno() + " "
+								+ hracilist.get(position).getPriezvisko()
+								+ " bol/a pridany na tento trening",
+						Toast.LENGTH_SHORT).show();
+				vysledok += hracilist.get(position).getMeno() + " "
+						+ hracilist.get(position).getPriezvisko()+"\n";
+			}
+		};
+	}
 }
