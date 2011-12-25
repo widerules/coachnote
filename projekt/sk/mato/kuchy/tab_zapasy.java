@@ -23,14 +23,20 @@ import android.widget.Toast;
 public class tab_zapasy extends Activity {
 
 	private Trening trening;
-	private InputStream akt, dbhracov;
+	private InputStream akt;
+	
+	//private InputStream dbhracov;
+	private sqlPomoc dbhraci= new sqlPomoc(this, "hraci", null, 1);
+	private ArrayList<Hrac> hraci= new ArrayList<Hrac>();
+	
 	private ScrollView zoznam;
 	private RelativeLayout pohlad;
 	private LinearLayout linLay;
 	private ArrayList<TextView> nadpisy;
 	private ArrayList<RadioButton> vytazy;
 	private ArrayList<Spinner> spinnery;
-
+	private int pozicia=0;
+	
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
@@ -54,12 +60,22 @@ public class tab_zapasy extends Activity {
 		linLay = new LinearLayout(this);
 		linLay.setOrientation(LinearLayout.VERTICAL);
 		zoznam.addView(linLay);
-
+		
 		// nacitanie databaz
 		nacitaj();
+		//vykreslenie
 		vypisuj();
 	}
 
+	private void vymaz( int index) {
+		ArrayList<Zapas> a= trening.getZapasy();
+		a.remove(0);
+		trening.setZapasy(a);
+		
+		uloz();
+		vypisuj();
+	}
+	
 	private boolean vypisuj() {
 		zoznam = new ScrollView(this);
 		linLay = new LinearLayout(this);
@@ -71,6 +87,7 @@ public class tab_zapasy extends Activity {
 
 		if (trening.getZapasy().size() < 1)
 			trening.generujZapasy();
+		//natotok by osm pridal tlacitko
 
 		TextView rebricek = new TextView(this);
 		rebricek.setText("Akutalny rebricek:\n" + trening.vypisRebricek());
@@ -80,19 +97,32 @@ public class tab_zapasy extends Activity {
 		nadpis.setText("Odporucane zapasy: \n");
 		linLay.addView(nadpis);
 
-		ArrayList<Zapas> zapasy = new ArrayList<Zapas>();
-		zapasy = trening.getZapasy();
+		
 		nadpisy = new ArrayList<TextView>();
 		vytazy = new ArrayList<RadioButton>();
 		spinnery = new ArrayList<Spinner>();
 		int pocetPreIDcka = 0;
-		for (Zapas zapas : zapasy) {
+		for (int i = 0; i < trening.getZapasy().size() ; i++) {
+			Zapas zapas= trening.getZapasy().get(i);
+			pozicia=i;
+			
+			//vymazavaci button
+			Button vymazZapas = new Button(this);
+			vymazZapas.setText("vymaz tento Zapas");
+			
+			vymazZapas.setOnClickListener( new OnClickListener() {
+				
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					vymaz(pozicia);
+				}
+			}); 
+	
+			linLay.addView(vymazZapas);
+			
 			// vypise dvojicu...
 			TextView tv = new TextView(this);
-			tv.setText(zapas.getA().getMeno() + " "
-					+ zapas.getA().getPriezvisko() + " vs. "
-					+ zapas.getB().getMeno() + " "
-					+ zapas.getB().getPriezvisko());
+			tv.setText(zapas.tostring());
 			linLay.addView(tv);
 			nadpisy.add(tv);
 
@@ -101,9 +131,9 @@ public class tab_zapasy extends Activity {
 			vytaz.setOrientation(RadioGroup.HORIZONTAL);
 
 			RadioButton Ahrac = new RadioButton(this);
-			Ahrac.setText("Vyhral:" + zapas.getA().getPriezvisko());
+			Ahrac.setText("Vyhral: Team A" );
 			RadioButton Bhrac = new RadioButton(this);
-			Bhrac.setText("Vyhral:" + zapas.getB().getPriezvisko());
+			Bhrac.setText("Vyhral: Team B" );
 
 			vytaz.addView(Ahrac);
 			vytaz.addView(Bhrac);
@@ -163,7 +193,7 @@ public class tab_zapasy extends Activity {
 			}
 		});
 
-		odosli.setOnClickListener(new OnClickListener() {// totok nefunguje!
+		odosli.setOnClickListener(new OnClickListener() {
 
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
@@ -173,9 +203,9 @@ public class tab_zapasy extends Activity {
 						for (Zapas zapas : zapisuj) {
 
 							if (vytazy.get(2 * i).isChecked())
-								zapas.setVytaz(zapas.getA());
+								zapas.setVytaz(1);
 							if (vytazy.get(2 * i + 1).isChecked())
-								zapas.setVytaz(zapas.getB());
+								zapas.setVytaz(2);
 							
 							int vysledok = -1;
 							vysledok = spinnery.get(i)
@@ -210,7 +240,7 @@ public class tab_zapasy extends Activity {
 	}
 
 	private void nacitaj() {
-		try {
+		/*try {
 			dbhracov = openFileInput("hraci.xml");
 			akt = openFileInput("trening.xml");
 		} catch (FileNotFoundException e) {
@@ -219,7 +249,18 @@ public class tab_zapasy extends Activity {
 			finish();
 		}
 
+		
 		trening = OXml.nacitajTrening(akt, OXml.nacitajHracov(dbhracov));
+		*/
+		try {
+			akt = openFileInput("trening.xml");
+			hraci=dbhraci.dajCeluDb();
+			trening = OXml.nacitajTrening(akt, hraci);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	private void uloz() {

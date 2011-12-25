@@ -5,26 +5,29 @@ import java.util.Date;
 import java.text.DateFormat;
 
 public class Hrac {
+	private int id;
 	private ArrayList<Date> dochadzka;
 	private int vek;
 	private String meno, priezvisko;
 	private double respekt;
 	private ArrayList<Zapas> Zapasy;
+//	private boolean pohlavie;
 
-	public Hrac(String nove_meno, String nove_priezvisko, int novy_vek) {
+	public Hrac(int id,String nove_meno, String nove_priezvisko, int novy_vek) {
 		dochadzka = new ArrayList<Date>();
 		Zapasy = new ArrayList<Zapas>();
-
+		this.setId(id);
 		this.setMeno(nove_meno);
 		this.setPriezvisko(nove_priezvisko);
 		this.setVek(novy_vek);
 		this.setRespekt(1);// nazaciatku je respekt 1
 	}
 
-	public Hrac(String nove_meno, String nove_priezvisko, int novy_vek,
+	public Hrac(int id, String nove_meno, String nove_priezvisko, int novy_vek,
 			double novy_respekt) {
 		dochadzka = new ArrayList<Date>();
 		Zapasy = new ArrayList<Zapas>();
+		this.setId(id);
 		this.setMeno(nove_meno);
 		this.setPriezvisko(nove_priezvisko);
 		this.setVek(novy_vek);
@@ -38,11 +41,14 @@ public class Hrac {
 				+ " " + vek + "\n";
 		return vypis;
 	}
-
-	/*
-	 * public String prevodDoSuboru(){ String vypis = meno+" "+priezvisko+" "
-	 * +String.valueOf(respekt)+" " + vek+ "\n"; return vypis; }
-	 */
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public int getId() {
+		return id;
+	}
 
 	public void setVek(int vek) {
 		this.vek = vek;

@@ -1,5 +1,7 @@
 package sk.mato.kuchy;
 
+/*treba doplnit tagy pre rozhodovanie medzi 2 a viahrou*/
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -66,7 +68,8 @@ public class OXml extends Activity{
 		      NodeList resNm = resNmElmnt.getChildNodes();
 		      double nrespekt= Double.parseDouble(((Node) resNm.item(0)).getNodeValue());
  		      //System.out.println("respekt : "  + ((Node) resNm.item(0)).getNodeValue());
-		      nacitane.add(new Hrac(nmeno, npriezvisko, nvek, nrespekt));
+		      nacitane.add(new Hrac(0, nmeno, npriezvisko, nvek, nrespekt));
+		      //tu id nieje ani nebude implementovane!
 		    }
 
 		  }
@@ -88,7 +91,8 @@ public class OXml extends Activity{
 	     Element main = document.getDocumentElement();
 	     
 	     Collection<Hrac> hra = new ArrayList<Hrac>();
-	     hra.add(new Hrac(nmeno, npriezvisko, nvek));
+	   //tu id nieje ani nebude implementovane! => je to 0 secko
+	     hra.add(new Hrac(0,nmeno, npriezvisko, nvek));
 
 	     
 	     for (@SuppressWarnings("unused") Hrac i : hra) {
@@ -225,14 +229,18 @@ private static Hrac najdiHracavDB(ArrayList<Hrac> db ,String meno, String priezv
 		      Element rokNmElmnt = (Element) rokNmElmntLst.item(0);
 		      NodeList rokNm = rokNmElmnt.getChildNodes();
 		      String vmenos=((Node) rokNm.item(0)).getNodeValue();
-		      String[] vmeno= vmenos.split("/");
-		      Hrac v =najdiHracavDB(hraci, vmeno[1], vmeno[0]);
+		      //String[] vmeno= vmenos.split("/");
+		      //Hrac v =najdiHracavDB(hraci, vmeno[1], vmeno[0]);
+		      //int vn=0;
+		      //if (v==a) vn=1;
+		      //if (v==b) vn=2;
+		      int vn = Integer.parseInt(vmenos);
 		      
 		      NodeList resNmElmntLst = fstElmnt.getElementsByTagName("vysledok");
 		      Element resNmElmnt = (Element) resNmElmntLst.item(0);
 		      NodeList resNm = resNmElmnt.getChildNodes();
 		      int vysledok= Integer.parseInt(((Node) resNm.item(0)).getNodeValue());
-		      zapasy.add(new Zapas(a, b, v, vysledok));
+		      zapasy.add(new Dvojhra(a, b, vn,vysledok));
 		      
 		    }
 		  }
@@ -243,7 +251,7 @@ private static Hrac najdiHracavDB(ArrayList<Hrac> db ,String meno, String priezv
 		    e.printStackTrace();
 		  }
 		
-		  nacitaj= new Trening(null, null, -1, "zleje!", null);  
+		  nacitaj= new Trening(new ArrayList<Hrac>(), new ArrayList<Zapas>(), 1, "zle nacitane!", new Date());  
 		return nacitaj;
 	}
  
@@ -362,16 +370,21 @@ public static void vytvorNovyTrening( Trening trening ) throws IOException{
 		serializer.startTag(null, "zapas");
 		
 		serializer.startTag(null, "ameno");
-		serializer.text( trening.getZapasy().get(i).getA().getPriezvisko()+"/"+trening.getZapasy().get(i).getA().getMeno());
+		Dvojhra zapas = null;
+		if (trening.getZapasy().get(i).isDvojHra()) {
+			zapas= (Dvojhra) trening.getZapasy().get(i);
+		}
+			
+		serializer.text( zapas.getTeamA().getPriezvisko()+"/"+zapas.getTeamA().getMeno());
 		serializer.endTag(null, "ameno");
 		
 		serializer.startTag(null, "bmeno");
-		serializer.text( trening.getZapasy().get(i).getB().getPriezvisko()+"/"+trening.getZapasy().get(i).getB().getMeno());
+		serializer.text( zapas.getTeamB().getPriezvisko()+"/"+zapas.getTeamB().getMeno());
 		serializer.endTag(null, "bmeno");
 		
 		serializer.startTag(null, "vmeno");
 		if (trening.getZapasy().get(i).getVysledok()<0) serializer.text("NiktoNevyhralEste/NiktoNevyhralEste");
-		else serializer.text( trening.getZapasy().get(i).getVytaz().getPriezvisko()+"/"+trening.getZapasy().get(i).getVytaz().getMeno());
+		else serializer.text( zapas.getVytaz()+"");
 		serializer.endTag(null, "vmeno");
 		
 		serializer.startTag(null, "vysledok");
@@ -452,16 +465,16 @@ public static void vytvorNovyTrening( Trening trening,File wallpaperDirectory, S
 		serializer.startTag(null, "zapas");
 		
 		serializer.startTag(null, "ameno");
-		serializer.text( trening.getZapasy().get(i).getA().getPriezvisko()+"/"+trening.getZapasy().get(i).getA().getMeno());
+		//serializer.text( trening.getZapasy().get(i).getA().getPriezvisko()+"/"+trening.getZapasy().get(i).getA().getMeno());
 		serializer.endTag(null, "ameno");
 		
 		serializer.startTag(null, "bmeno");
-		serializer.text( trening.getZapasy().get(i).getB().getPriezvisko()+"/"+trening.getZapasy().get(i).getB().getMeno());
+		//serializer.text( trening.getZapasy().get(i).getB().getPriezvisko()+"/"+trening.getZapasy().get(i).getB().getMeno());
 		serializer.endTag(null, "bmeno");
 		
 		serializer.startTag(null, "vmeno");
 		if (trening.getZapasy().get(i).getVysledok()<0) serializer.text("NiktoNevyhralEste/NiktoNevyhralEste");
-		else serializer.text( trening.getZapasy().get(i).getVytaz().getPriezvisko()+"/"+trening.getZapasy().get(i).getVytaz().getMeno());
+	//	else serializer.text( trening.getZapasy().get(i).getVytaz().getPriezvisko()+"/"+trening.getZapasy().get(i).getVytaz().getMeno());
 		serializer.endTag(null, "vmeno");
 		
 		serializer.startTag(null, "vysledok");

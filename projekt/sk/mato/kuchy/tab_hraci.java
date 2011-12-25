@@ -1,6 +1,5 @@
 package sk.mato.kuchy;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,14 +22,18 @@ public class tab_hraci extends Activity {
 	private TextView vypis;
 	private ScrollView pohlad;
 	private LinearLayout linLay;
-	private InputStream akt, dbhracov;
+	private InputStream akt;
+	
+	//private InputStream dbhracov;
 	private ArrayList<Hrac> hracilist;
+	
+	private sqlPomoc dbhraci= new sqlPomoc(this, "hraci", null, 1);
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		vypis = new TextView(tab_hraci.this);
-		// nacitanie databaz
+	/*	// nacitanie databaz
 		try {
 			dbhracov = openFileInput("hraci.xml");
 			akt = openFileInput("trening.xml");
@@ -41,8 +44,16 @@ public class tab_hraci extends Activity {
 		}
 
 		trening = OXml.nacitajTrening(akt, OXml.nacitajHracov(dbhracov));
+		*/
+		
+		ArrayList<Hrac> dbHracov= dbhraci.dajCeluDb();
+		
+		
+		trening= OXml.nacitajTrening(akt, dbHracov);
+		
 		// hlavicka
 		vypis.append("Na treningu sa zucastnuli: \n");
+		
 		vypis.append(trening.vypisHracov());
 
 		pohlad = new ScrollView(this);
@@ -62,13 +73,15 @@ public class tab_hraci extends Activity {
 				finish();
 				break;
 			case  1:
-				try {
+				/*try {
 					hracilist = OXml.nacitajHracov(openFileInput("hraci.xml"));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					finish();
 				}
+				*/
+				hracilist=dbhraci.dajCeluDb();
 				trening.pridajHracovText(new StringBuffer(data.getAction()), hracilist);
 				break;
 			case  -1:
@@ -91,7 +104,6 @@ public class tab_hraci extends Activity {
 			}
 			vypis.setText("na treningu sa zucastnili: \n"
 					+ trening.vypisHracov() + "\n");
-			
 		}	
 	}
 	

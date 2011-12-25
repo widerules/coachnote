@@ -1,11 +1,11 @@
 package sk.mato.kuchy;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -37,7 +37,13 @@ public class tab_formular extends Activity {
 	private int mDay;
 
 	static final int DATE_DIALOG_ID = 0;
-	private InputStream akt, dbhracov;
+	private InputStream akt;
+	
+	private sqlPomoc dbhracov= new sqlPomoc(this, "hraci", null, 1);
+	private sqlPomoc dbtreningy= new sqlPomoc(this, "treningy", null, 1);
+	private sqlPomoc dbzapasy= new sqlPomoc(this, "zapasy", null, 1);
+	
+	private ArrayList<Hrac> hraci= new ArrayList<Hrac>();
 	private Trening trening;
 
 	@Override
@@ -48,14 +54,13 @@ public class tab_formular extends Activity {
 		setContentView(R.layout.tab_formular);
 		// nacitanie databaz
 		try {
-			dbhracov = openFileInput("hraci.xml");
 			akt = openFileInput("trening.xml");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			finish();
 		}
-		trening = OXml.nacitajTrening(akt, OXml.nacitajHracov(dbhracov));
+		hraci= dbhracov.dajCeluDb();
+		trening = OXml.nacitajTrening(akt, hraci);
 
 		// inicializacia editTextu
 		final EditText edittext = (EditText) findViewById(R.id.popistreningu);
@@ -63,10 +68,8 @@ public class tab_formular extends Activity {
 			edittext.setText(trening.getPopisTreningu());
 		edittext.setOnKeyListener(new OnKeyListener() {
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				// If the event is a key-down event on the "enter" button
 				if ((event.getAction() == KeyEvent.ACTION_DOWN)
 						&& (keyCode == KeyEvent.KEYCODE_ENTER)) {
-					// Perform action on key press
 					Toast.makeText(getBaseContext(), edittext.getText(),
 							Toast.LENGTH_SHORT).show();
 					trening.setPopisTreningu(edittext.getText().toString());
@@ -97,20 +100,16 @@ public class tab_formular extends Activity {
 					}
 				});
 		// inicializacia datepickera
-		// if (trening != null) aktualneZadanydatum= trening.getDatumTreningu();
 		aktualneZadanydatum = null;
-		// capture our View elements
 		mDateDisplay = (TextView) findViewById(R.id.dateDisplay);
 		mPickDate = (Button) findViewById(R.id.pickDate);
 
-		// add a click listener to the button
 		mPickDate.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				showDialog(DATE_DIALOG_ID);
 			}
 		});
 
-		// get the current date
 		final Calendar c = Calendar.getInstance();
 		mYear = c.get(Calendar.YEAR);
 		mMonth = c.get(Calendar.MONTH);
@@ -128,7 +127,6 @@ public class tab_formular extends Activity {
 		Button button = (Button) findViewById(R.id.odosliform);
 		button.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				// zapis do suboru...
 
 				trening.setPopisTreningu(edittext.getText().toString());
 
@@ -151,33 +149,25 @@ public class tab_formular extends Activity {
 		Button ukonci = (Button) findViewById(R.id.koniec);
 		ukonci.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				// if (aktualneZadanydatum!= null)
-				// trening.setDatumTreningu(aktualneZadanydatum);
 				trening.setPopisTreningu(edittext.getText().toString());
 				trening.setPocetKurtov(aktualneZadanyPocetKurtov);
-				try {
-					OXml.vytvorNovyTrening(trening);
-
-					SimpleDateFormat formatter = new SimpleDateFormat(
-							"dd-MM-yyyy");
-					String nazov = formatter.format(trening.getDatumTreningu());
-					File premenuj = new File(
-							"/data/data/sk.mato.kuchy/files/trening.xml");
-					File novy = new File("/data/data/sk.mato.kuchy/files/"
-							+ nazov + ".xml");
-					premenuj.renameTo(novy);
-
-					Toast.makeText(getBaseContext(),
-							"Udaje o treningu uspesne ulozene!",
-							Toast.LENGTH_LONG).show();
-					finish();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					Toast.makeText(getBaseContext(),
-							"chyba pri zapisovani suboru!", Toast.LENGTH_LONG)
-							.show();
-					e.printStackTrace();
+				
+				for (Zapas z : trening.getZapasy()) {
+					z.setDatum(trening.getDatumTreningu());
+					dbzapasy.pridajZapas(z);
 				}
+				
+				StringBuffer zapasyString=new StringBuffer();
+				for (Zapas z : trening.getZapasy()) {
+					zapasyString.append(dbzapasy.getIdZapasu(z)+"/");
+				}
+				
+				dbtreningy.pridajTrening(trening, zapasyString);
+				
+				Toast.makeText(getBaseContext(),
+						"Udaje o treningu uspesne ulozene!",
+						Toast.LENGTH_LONG).show();
+				finish();
 			}
 		});
 	}
@@ -196,7 +186,7 @@ public class tab_formular extends Activity {
 			// TODO Auto-generated catch block
 			Toast.makeText(getBaseContext(), "chyba pri zapisovani suboru!",
 					Toast.LENGTH_LONG).show();
-			// e.printStackTrace();
+			 e.printStackTrace();
 		}
 	}
 
@@ -205,14 +195,13 @@ public class tab_formular extends Activity {
 		// TODO Auto-generated method stub
 		super.onResume();
 		try {
-			dbhracov = openFileInput("hraci.xml");
 			akt = openFileInput("trening.xml");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			finish();
 		}
-		trening = OXml.nacitajTrening(akt, OXml.nacitajHracov(dbhracov));
+		hraci= dbhracov.dajCeluDb();
+		trening = OXml.nacitajTrening(akt, hraci);
 	}
 
 	private void updateDisplay() throws ParseException {

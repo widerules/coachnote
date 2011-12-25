@@ -1,7 +1,5 @@
 package sk.mato.kuchy;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,16 +18,19 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class pridajhraca extends Activity {
 
-	private ArrayList<Hrac> hracilist;
+	private sqlPomoc dbHracov=new sqlPomoc(this, "hraci", null, 1);
+	private ArrayList<Hrac> hracilist= new ArrayList<Hrac>();
 	private OnItemClickListener piker;
-	private String vysledok;
+	private String vysledok= new String();
 	private int GET_CODE = 0; // pre vytvorenie hraca co nieje v DB
 	private int RESULT_ADD = 1; // 1 znaci ze pridavam pre
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.pridajhraca);
-
+		
+		hracilist=dbHracov.dajCeluDb();
+		
 		super.onCreate(savedInstanceState);
 		vysledok = new String();
 		piker = new OnItemClickListener() {
@@ -48,7 +49,7 @@ public class pridajhraca extends Activity {
 		};
 
 		// nacitanie hracov
-
+/*
 		try {
 			InputStream dbhracov = openFileInput("hraci.xml");
 			hracilist = OXml.nacitajHracov(dbhracov);
@@ -56,6 +57,7 @@ public class pridajhraca extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+*/
 		// list View
 		ListView lv = (ListView) findViewById(R.id.listview);
 
@@ -85,6 +87,7 @@ public class pridajhraca extends Activity {
 
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
+				if (vysledok.equals(new String())) vysledok="47 47\n";
 				setResult(RESULT_ADD, (new Intent()).setAction(vysledok));
 				finish();
 			}

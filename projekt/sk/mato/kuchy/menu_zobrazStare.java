@@ -2,6 +2,7 @@ package sk.mato.kuchy;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,12 +45,22 @@ private TextView statystiky;
 		
 		statystiky.append("pocetkurtov: "+trening.getPocetKurtov()+"\n\n");
 		
+		
+		sqlPomoc a= new sqlPomoc(this, "zapasy", null, 1);
+		a.inicializujHracskuDB();
+		
+		
+		for (Hrac novy : trening.getHracov()) {
+			a.pridajHraca(novy);
+		}
+
+		Hrac novy=a.getHraca("Martin", "kuchynar");
 		statystiky.append("dochadzka:\n"+trening.vypisHracov()+"\n\n");
 		
-		statystiky.append("zapasy:\n"+ trening.vypisZapasy(-1)+"\n\n");
+		statystiky.append("zapasy:\n"+ novy.getPriezvisko()+"\n\n");
 		
 		trening.vytvorRebricek();
-		statystiky.append("aktualny rebricek:\n"+ trening.vypisRebricek()+"\n\n");
+		
 		linlay.addView(statystiky);
 		
 		pohlad.addView(linlay);

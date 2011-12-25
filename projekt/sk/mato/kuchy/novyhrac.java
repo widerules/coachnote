@@ -1,10 +1,5 @@
 package sk.mato.kuchy;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -22,12 +17,11 @@ import android.widget.Toast;
 
 public class novyhrac extends Activity {
 
-	private InputStream hraci;
-	private ArrayList<Hrac> hracilist;
+	private sqlPomoc hraci=new sqlPomoc(this, "hraci", null, 1);
 	private String noveMeno, novePriezvisko;
 	private int novyVek;
 	private Double novyRespekt;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -132,11 +126,13 @@ public class novyhrac extends Activity {
 		Button button = (Button) findViewById(R.id.ulozHraca);
 		button.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
+				
 				// zapis do suboru...
 				noveMeno = edittext.getText().toString();
 				novePriezvisko = edittext2.getText().toString();
 				novyRespekt = Double
 						.parseDouble(edittext3.getText().toString());
+				/*
 				try {
 					hraci = openFileInput("hraci.xml");
 					hracilist = OXml.nacitajHracov(hraci);
@@ -145,10 +141,13 @@ public class novyhrac extends Activity {
 					e.printStackTrace();
 					finish();
 				}
-
-				Hrac novy = new Hrac(noveMeno, novePriezvisko, novyVek,
+				
+				
+				Hrac novy = new Hrac(hracilist.size()+1,noveMeno, novePriezvisko, novyVek,
 						novyRespekt);
+				
 				hracilist.add(novy);
+				
 				try {
 					OXml.zapisHracomNovyrespekt(hracilist);
 					Toast.makeText(getBaseContext(),
@@ -165,8 +164,11 @@ public class novyhrac extends Activity {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				*/
+				hraci.pridajHraca(new Hrac(hraci.dajCeluDb().size()+1,noveMeno, novePriezvisko, novyVek,
+						novyRespekt));
+				finish();
 			}
 		});
-
 	}
 }

@@ -17,14 +17,53 @@ import android.widget.Toast;
 
 public class menu_novyTrening extends TabActivity {
 
-	private InputStream dbhracov;
+	//private InputStream dbhracov;
+	private sqlPomoc dbhracov= new sqlPomoc(this, "hraci", null, 1);
+	private sqlPomoc dbtreningy= new sqlPomoc(this, "treningy", null, 1);
+	private sqlPomoc dbzapasy= new sqlPomoc(this, "zapasy", null, 1);
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.novytrening);
-
-		File db = new File("/data/data/" + getPackageName()
+	
+		//prve pustenie/pripad vycistenia DB
+		if (!sqlPomoc.checkDataBase(getDatabasePath("hraci").getAbsolutePath()))
+		{
+			//inicializacia 
+			dbhracov.inicializujHracskuDB();
+			
+			//nacitanie assets
+			ArrayList<Hrac> hraci= new ArrayList<Hrac>();
+			try {
+				InputStream a = getAssets().open("hraci.xml");
+				hraci= OXml.nacitajHracov(a);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			//pridanie do sql
+			for (Hrac h : hraci) {
+				dbhracov.pridajHraca(h);
+			}
+			
+			Toast
+			.makeText(
+					getBaseContext(),
+					" Automaticky načítaná databaza, odporúčame aktualizáciu!",
+					Toast.LENGTH_SHORT).show();
+		}
+		if (!sqlPomoc.checkDataBase(getDatabasePath("treningy").getAbsolutePath())){
+			dbtreningy.inicializujTreningoovuDB();
+		}
+		
+		if (!sqlPomoc.checkDataBase(getDatabasePath("zapasy").getAbsolutePath())){
+			dbzapasy.inicializujZapasovuDB();
+		}
+		
+		
+		/*File db = new File("/data/data/" + getPackageName()
 				+ "/files/hraci.xml");
 		if (!db.exists()) {
 			try {
@@ -51,7 +90,7 @@ public class menu_novyTrening extends TabActivity {
 				e.printStackTrace();
 			}
 		}
-		// inicializacia noveho xml filu pre trening
+		*/
 		try {
 			File trening = new File("/data/data/" + getPackageName()
 					+ "/files/trening.xml");
@@ -69,7 +108,6 @@ public class menu_novyTrening extends TabActivity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		// praca s zalozkami
 
 		Resources res = getResources();
@@ -98,8 +136,7 @@ public class menu_novyTrening extends TabActivity {
 
 	public static void zapissubor(InputStream target, String name)
 			throws IOException {
-		File db = new File("/data/data/sk.mato.kuchy/files/" + name);// zmenit
-																		// cestu!
+		File db = new File("/data/data/sk.mato.kuchy/files/" + name);
 		db.createNewFile();
 		OutputStream myOutput = new FileOutputStream(db);
 

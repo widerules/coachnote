@@ -142,13 +142,14 @@ public class menu_upload extends Activity {
 	}
 
 	private void uploadDBTreningov() {
+		@SuppressWarnings("unused")
 		List<NameValuePair> data = new ArrayList<NameValuePair>();
 		File hlavnaDir = new File("/data/data/sk.mato.kuchy/files/");
 
 		for (File f : hlavnaDir.listFiles()) {
 
 			if (!f.getName().equalsIgnoreCase("hraci.xml")) {
-				try {
+				/*try {
 
 					Trening uploadovany;
 					uploadovany = OXml.nacitajTrening(
@@ -220,7 +221,7 @@ public class menu_upload extends Activity {
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
 			}
 
 		}
