@@ -18,6 +18,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
+/*
+ * treba pridat do treningovejDb a ZapasovejDb parameter ci uz to je zosynchronizovane 
+ * Tj. budu sa odosielat iba tie nezosynchonizovane a vsetko co si stiahne z netu bude zosynchonizovane
+ * 
+ * potom bude problem s tym ak niekto prida nieco na server pomocou webstranky!...este neviem ako*/
 public class menu_upload extends Activity {
 
 	private sqlPomoc dbhracov= new sqlPomoc(this, "hraci", null, 1);
@@ -116,6 +121,8 @@ public class menu_upload extends Activity {
 		data.add(new BasicNameValuePair("pocet_h", "" + DB.size()));
 
 		for (int i = 0; i < DB.size(); i++) {
+			data.add(new BasicNameValuePair("id_" + i, ""
+					+ DB.get(i).getId()+""));
 			data.add(new BasicNameValuePair("meno_" + i, ""
 					+ DB.get(i).getMeno()));
 			data.add(new BasicNameValuePair("priezvisko_" + i, ""
@@ -130,6 +137,7 @@ public class menu_upload extends Activity {
 		Cursor cursorzapasy= dbzapasy.getReadableDatabase().rawQuery("SELECT * FROM `zapasy` ", new String[] {});
 		
 		data.add(new BasicNameValuePair("zapasy", "ano" ));
+		
 		int i=0;
 		for (cursorzapasy.moveToFirst(); !cursorzapasy.isAfterLast(); cursorzapasy.moveToNext()) {
 			data.add(new BasicNameValuePair("id_"+i, cursorzapasy.getString(0)));
@@ -142,6 +150,8 @@ public class menu_upload extends Activity {
 			i++;
 		}
 		cursorzapasy.close();
+		
+		data.add(new BasicNameValuePair("pocet_z", i+"" ));
 		
 		//DB treningov
 		Cursor cursor =dbtreningy.getReadableDatabase().rawQuery("SELECT * FROM `treningy` ", new String[] {});
@@ -157,6 +167,7 @@ public class menu_upload extends Activity {
 			i++;
 		}
 		cursor.close();
+		data.add(new BasicNameValuePair("pocet_t", i+"" ));
 		
 		try{
 			WebUtilities
