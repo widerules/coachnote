@@ -161,9 +161,9 @@ private static Hrac najdiHracavDB(ArrayList<Hrac> db ,String meno, String priezv
 		      Element fstNmElmnt = (Element) fstNmElmntLst.item(0);
 		      NodeList fstNm = fstNmElmnt.getChildNodes();
 		      String datum=((Node) fstNm.item(0)).getNodeValue();
-		      SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		      
-		      datumTreningu= formatter.parse(datum);
+		      
+		      datumTreningu= new Date(datum);
 		    //pocetkurtov
 			  fstElmnt = (Element) datumnode;
 		      fstNmElmntLst = fstElmnt.getElementsByTagName("pock");
@@ -331,8 +331,7 @@ public static void vytvorNovyTrening( Trening trening ) throws IOException{
 	
 	//datumtreningu
 	serializer.startTag(null, "date");
-	SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-	serializer.text(formatter.format(trening.getDatumTreningu()));
+	serializer.text(trening.getDatumTreningu().toGMTString());
 	serializer.endTag(null, "date");
 	
 	//pocetkurtov

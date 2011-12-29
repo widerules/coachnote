@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,6 +11,7 @@ import java.util.Date;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,19 +24,21 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 public class tab_formular extends Activity {
 
 	private TextView mDateDisplay;
-	private Date aktualneZadanydatum;
 	private Button mPickDate;
 	private int aktualneZadanyPocetKurtov;
 	private int mYear;
 	private int mMonth;
 	private int mDay;
+	
 
 	static final int DATE_DIALOG_ID = 0;
+	private final int TIME_DIALOG_ID=1;
 	private InputStream akt;
 	
 	private sqlPomoc dbhracov= new sqlPomoc(this, "hraci", null, 1);
@@ -45,6 +47,8 @@ public class tab_formular extends Activity {
 	
 	private ArrayList<Hrac> hraci= new ArrayList<Hrac>();
 	private Trening trening;
+	private TextView mTimeDisplay;
+	private Button mPickTime;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +104,6 @@ public class tab_formular extends Activity {
 					}
 				});
 		// inicializacia datepickera
-		aktualneZadanydatum = null;
 		mDateDisplay = (TextView) findViewById(R.id.dateDisplay);
 		mPickDate = (Button) findViewById(R.id.pickDate);
 
@@ -122,7 +125,21 @@ public class tab_formular extends Activity {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+			
+		//inicializacia time pickera
+		mTimeDisplay = (TextView) findViewById(R.id.timeDisplay);
+	    mPickTime = (Button) findViewById(R.id.pickTime);
+	    
+	    mPickTime.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+	            showDialog(TIME_DIALOG_ID);
+	        }
+	    });
 
+	    updateDisplayTime();
+
+		
+		
 		// inicializacia potvrzovacieho buttona
 		Button button = (Button) findViewById(R.id.odosliform);
 		button.setOnClickListener(new OnClickListener() {
@@ -208,11 +225,15 @@ public class tab_formular extends Activity {
 		// TODO Auto-generated method stub
 		mDateDisplay.setText(new StringBuilder().append(mMonth + 1).append("-")
 				.append(mDay).append("-").append(mYear).append(" "));
-		// yyyy-mm-dd format
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-		aktualneZadanydatum = formatter
-				.parse(mDay + "/" + mMonth + "/" + mYear);
-		trening.setDatumTreningu(aktualneZadanydatum);
+		trening.setDatumTreningu(new Date(mYear, mMonth, mDay, mHour, mMinute));
+	}
+	
+	private void updateDisplayTime() {
+	    mTimeDisplay.setText(
+	        new StringBuilder()
+	                .append(pad(mHour)).append(":")
+	                .append(pad(mMinute)));
+		trening.setDatumTreningu(new Date(mYear, mMonth, mDay, mHour, mMinute));
 	}
 
 	private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
@@ -230,6 +251,24 @@ public class tab_formular extends Activity {
 			}
 		}
 	};
+	private int mHour;
+	private int mMinute;
+
+	private TimePickerDialog.OnTimeSetListener mTimeSetListener =
+	    new TimePickerDialog.OnTimeSetListener() {
+	        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+	            mHour = hourOfDay;
+	            mMinute = minute;
+	            updateDisplayTime();
+	        }
+	    };
+	
+	    private static String pad(int c) {
+	        if (c >= 10)
+	            return String.valueOf(c);
+	        else
+	            return "0" + String.valueOf(c);
+	    }
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -237,7 +276,12 @@ public class tab_formular extends Activity {
 		case DATE_DIALOG_ID:
 			return new DatePickerDialog(this, mDateSetListener, mYear, mMonth,
 					mDay);
+		 case TIME_DIALOG_ID:
+		        return new TimePickerDialog(this,
+		                mTimeSetListener, mHour, mMinute, false);
 		}
 		return null;
 	}
+
+	
 }
