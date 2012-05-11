@@ -8,12 +8,13 @@ package sk.mato.kuchy;
 		hracilist= trening.getHracov();
  */
 
+//FIXME!!
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

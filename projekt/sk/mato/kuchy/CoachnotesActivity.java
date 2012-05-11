@@ -14,6 +14,7 @@ public class CoachnotesActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        //novy trening
         Button menu_novyTrening= (Button) findViewById(R.id.menu_novyTrening); 
         menu_novyTrening.setOnClickListener( new OnClickListener() {
 			
@@ -25,7 +26,6 @@ public class CoachnotesActivity extends Activity {
 		});
         
         //menu_otvortStare
-        
         Button menu_otvortStare= (Button) findViewById(R.id.menu_otvortStare); 
         menu_otvortStare.setOnClickListener( new OnClickListener() {
 			
@@ -36,6 +36,8 @@ public class CoachnotesActivity extends Activity {
 			}
 		});
         
+        
+        //upload na server
         Button menu_upload= (Button) findViewById(R.id.menu_upload); 
         menu_upload.setOnClickListener( new OnClickListener() {
 			
@@ -44,6 +46,28 @@ public class CoachnotesActivity extends Activity {
 				Intent intent= new Intent( v.getContext(), menu_upload.class);
 				startActivityForResult(intent, 0);
 			}
-		}); 
+		});
+        
+        //profil
+        Button profil= (Button) findViewById(R.id.profil); 
+        profil.setOnClickListener( new OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent= new Intent( v.getContext(), profil.class);
+				startActivityForResult(intent, 0);
+			}
+		});
+        
+        //koniec
+        Button koniec= (Button) findViewById(R.id.Koniec2);
+        koniec.setOnClickListener( new OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				CoachnotesActivity.this.finish();
+			}
+		});
     }
+    
 }

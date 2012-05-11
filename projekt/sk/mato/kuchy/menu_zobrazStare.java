@@ -1,11 +1,16 @@
 package sk.mato.kuchy;
-
+//Log.i(Constants._ID, novy.getTeamA().getPriezvisko());
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.SyncStateContract.Constants;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -39,14 +44,22 @@ public class menu_zobrazStare extends Activity {
 
 		Date novyDatumTreningu = new Date();
 		String novyPopisTreningu = new String();
-		;
 		int novyPocetKurtov = 0;
 		ArrayList<Zapas> noveZapasy = new ArrayList<Zapas>();
 		ArrayList<Hrac> novyHraci = new ArrayList<Hrac>();
-
+		
+		DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		// aj to bude iba jeden treining...
 		for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-			novyDatumTreningu = new Date(cursor.getString(1));
+
+			
+			try {
+				novyDatumTreningu = df.parse(cursor.getString(1));
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 			novyPopisTreningu = cursor.getString(2);
 			novyPocetKurtov = Integer.parseInt(cursor.getString(3));
 
@@ -57,13 +70,13 @@ public class menu_zobrazStare extends Activity {
 				}catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-				
-				
-				
+				}	
 			}
 
 			String[] zapasyString = cursor.getString(5).split("/");
+			
+			Log.i(Constants._ID, zapasyString.length+"");
+			
 			for (int i = 0; i < zapasyString.length; i++) {
 				try{
 					noveZapasy.add(dbzapasy.getZapas(Integer
@@ -95,10 +108,9 @@ public class menu_zobrazStare extends Activity {
 		trening.vytvorRebricek();
 
 		linlay.addView(statystiky);
-
 		pohlad.addView(linlay);
-
 		setContentView(pohlad);
+		
 	}
 
 }

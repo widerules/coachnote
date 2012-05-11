@@ -9,9 +9,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -35,17 +37,16 @@ public class tab_formular extends Activity {
 	private int mYear;
 	private int mMonth;
 	private int mDay;
-	
 
 	static final int DATE_DIALOG_ID = 0;
-	private final int TIME_DIALOG_ID=1;
+	private final int TIME_DIALOG_ID = 1;
 	private InputStream akt;
-	
-	private sqlPomoc dbhracov= new sqlPomoc(this, "hraci", null, 1);
-	private sqlPomoc dbtreningy= new sqlPomoc(this, "treningy", null, 1);
-	private sqlPomoc dbzapasy= new sqlPomoc(this, "zapasy", null, 1);
-	
-	private ArrayList<Hrac> hraci= new ArrayList<Hrac>();
+
+	private sqlPomoc dbhracov = new sqlPomoc(this, "hraci", null, 1);
+	private sqlPomoc dbtreningy = new sqlPomoc(this, "treningy", null, 1);
+	private sqlPomoc dbzapasy = new sqlPomoc(this, "zapasy", null, 1);
+
+	private ArrayList<Hrac> hraci = new ArrayList<Hrac>();
 	private Trening trening;
 	private TextView mTimeDisplay;
 	private Button mPickTime;
@@ -63,7 +64,7 @@ public class tab_formular extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		hraci= dbhracov.dajCeluDb();
+		hraci = dbhracov.dajCeluDb();
 		trening = OXml.nacitajTrening(akt, hraci);
 
 		// inicializacia editTextu
@@ -89,20 +90,18 @@ public class tab_formular extends Activity {
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter
 				.createFromResource(this, R.array.kurty_array,
 						android.R.layout.simple_spinner_item);
-		adapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
-		spinner
-				.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-					public void onItemSelected(AdapterView<?> parent,
-							View view, int pos, long id) {
-						aktualneZadanyPocetKurtov = Integer.parseInt(parent
-								.getItemAtPosition(pos).toString());
-					}
+		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id) {
+				aktualneZadanyPocetKurtov = Integer.parseInt(parent
+						.getItemAtPosition(pos).toString());
+			}
 
-					public void onNothingSelected(AdapterView<?> parent) {
-					}
-				});
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
 		// inicializacia datepickera
 		mDateDisplay = (TextView) findViewById(R.id.dateDisplay);
 		mPickDate = (Button) findViewById(R.id.pickDate);
@@ -125,21 +124,19 @@ public class tab_formular extends Activity {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-			
-		//inicializacia time pickera
+
+		// inicializacia time pickera
 		mTimeDisplay = (TextView) findViewById(R.id.timeDisplay);
-	    mPickTime = (Button) findViewById(R.id.pickTime);
-	    
-	    mPickTime.setOnClickListener(new View.OnClickListener() {
+		mPickTime = (Button) findViewById(R.id.pickTime);
+
+		mPickTime.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-	            showDialog(TIME_DIALOG_ID);
-	        }
-	    });
+				showDialog(TIME_DIALOG_ID);
+			}
+		});
 
-	    updateDisplayTime();
+		updateDisplayTime();
 
-		
-		
 		// inicializacia potvrzovacieho buttona
 		Button button = (Button) findViewById(R.id.odosliform);
 		button.setOnClickListener(new OnClickListener() {
@@ -168,22 +165,22 @@ public class tab_formular extends Activity {
 			public void onClick(View v) {
 				trening.setPopisTreningu(edittext.getText().toString());
 				trening.setPocetKurtov(aktualneZadanyPocetKurtov);
-				
+
 				for (Zapas z : trening.getZapasy()) {
 					z.setDatum(trening.getDatumTreningu());
 					dbzapasy.pridajZapas(z);
 				}
-				
-				StringBuffer zapasyString=new StringBuffer();
+
+				StringBuffer zapasyString = new StringBuffer();
 				for (Zapas z : trening.getZapasy()) {
-					zapasyString.append(dbzapasy.getIdZapasu(z)+"/");
+					zapasyString.append(dbzapasy.getIdZapasu(z) + "/");
 				}
-				
+
 				dbtreningy.pridajTrening(trening, zapasyString);
-				
+
 				Toast.makeText(getBaseContext(),
-						"Udaje o treningu uspesne ulozene!",
-						Toast.LENGTH_LONG).show();
+						"Udaje o treningu uspesne ulozene!", Toast.LENGTH_LONG)
+						.show();
 				finish();
 			}
 		});
@@ -203,7 +200,7 @@ public class tab_formular extends Activity {
 			// TODO Auto-generated catch block
 			Toast.makeText(getBaseContext(), "chyba pri zapisovani suboru!",
 					Toast.LENGTH_LONG).show();
-			 e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 
@@ -217,7 +214,7 @@ public class tab_formular extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		hraci= dbhracov.dajCeluDb();
+		hraci = dbhracov.dajCeluDb();
 		trening = OXml.nacitajTrening(akt, hraci);
 	}
 
@@ -227,12 +224,10 @@ public class tab_formular extends Activity {
 				.append(mDay).append("-").append(mYear).append(" "));
 		trening.setDatumTreningu(new Date(mYear, mMonth, mDay, mHour, mMinute));
 	}
-	
+
 	private void updateDisplayTime() {
-	    mTimeDisplay.setText(
-	        new StringBuilder()
-	                .append(pad(mHour)).append(":")
-	                .append(pad(mMinute)));
+		mTimeDisplay.setText(new StringBuilder().append(pad(mHour)).append(":")
+				.append(pad(mMinute)));
 		trening.setDatumTreningu(new Date(mYear, mMonth, mDay, mHour, mMinute));
 	}
 
@@ -254,21 +249,20 @@ public class tab_formular extends Activity {
 	private int mHour;
 	private int mMinute;
 
-	private TimePickerDialog.OnTimeSetListener mTimeSetListener =
-	    new TimePickerDialog.OnTimeSetListener() {
-	        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-	            mHour = hourOfDay;
-	            mMinute = minute;
-	            updateDisplayTime();
-	        }
-	    };
-	
-	    private static String pad(int c) {
-	        if (c >= 10)
-	            return String.valueOf(c);
-	        else
-	            return "0" + String.valueOf(c);
-	    }
+	private TimePickerDialog.OnTimeSetListener mTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+			mHour = hourOfDay;
+			mMinute = minute;
+			updateDisplayTime();
+		}
+	};
+
+	private static String pad(int c) {
+		if (c >= 10)
+			return String.valueOf(c);
+		else
+			return "0" + String.valueOf(c);
+	}
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -276,12 +270,39 @@ public class tab_formular extends Activity {
 		case DATE_DIALOG_ID:
 			return new DatePickerDialog(this, mDateSetListener, mYear, mMonth,
 					mDay);
-		 case TIME_DIALOG_ID:
-		        return new TimePickerDialog(this,
-		                mTimeSetListener, mHour, mMinute, false);
+		case TIME_DIALOG_ID:
+			return new TimePickerDialog(this, mTimeSetListener, mHour, mMinute,
+					false);
 		}
 		return null;
 	}
 
-	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// TODO Auto-generated method stub
+		if (keyCode == KeyEvent.KEYCODE_BACK ) {
+			final AlertDialog alertDialog = new AlertDialog.Builder(
+					tab_formular.this).create();
+			alertDialog.setTitle("POZOR");
+			alertDialog.setMessage("tento trening nebude ulozeny!");
+			alertDialog.setButton("exit",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							tab_formular.this.finish();
+						}
+					});
+			alertDialog.setButton2("cancel",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					});
+			alertDialog.show();
+			return true;
+		}
+		else {
+			return super.onKeyDown(keyCode, event);
+		}
+
+	}
+
 }

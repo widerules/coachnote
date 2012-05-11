@@ -6,7 +6,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -22,6 +25,7 @@ import android.widget.Toast;
 
 public class tab_zapasy extends Activity {
 
+	
 	private Trening trening;
 	private InputStream akt;
 	
@@ -272,4 +276,32 @@ public class tab_zapasy extends Activity {
 		}
 	}
 
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// TODO Auto-generated method stub
+		if (keyCode == KeyEvent.KEYCODE_BACK ) {
+			final AlertDialog alertDialog = new AlertDialog.Builder(
+					tab_zapasy.this).create();
+			alertDialog.setTitle("POZOR");
+			alertDialog.setMessage("tento trening nebude ulozeny!");
+			alertDialog.setButton("exit",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							tab_zapasy.this.finish();
+						}
+					});
+			alertDialog.setButton2("cancel",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+
+						}
+					});
+			alertDialog.show();
+			return true;
+		}
+		else {
+			return super.onKeyDown(keyCode, event);
+		}
+
+	}
 }

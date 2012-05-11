@@ -12,6 +12,8 @@ import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.provider.SyncStateContract.Constants;
+import android.util.Log;
 import android.widget.TabHost;
 import android.widget.Toast;
 
@@ -56,6 +58,7 @@ public class menu_novyTrening extends TabActivity {
 		}
 		if (!sqlPomoc.checkDataBase(getDatabasePath("treningy").getAbsolutePath())){
 			dbtreningy.inicializujTreningoovuDB();
+			Log.i(Constants._ID, "inicializujem");
 		}
 		
 		if (!sqlPomoc.checkDataBase(getDatabasePath("zapasy").getAbsolutePath())){
