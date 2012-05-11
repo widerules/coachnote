@@ -1,5 +1,8 @@
 package sk.mato.kuchy;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -7,9 +10,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 
 public class sqlPomoc extends SQLiteOpenHelper {
 
@@ -34,20 +37,22 @@ public class sqlPomoc extends SQLiteOpenHelper {
 	// hraci
 	public void inicializujHracskuDB() {
 		SQLiteDatabase db = this.getReadableDatabase();
-		db
-				.execSQL("CREATE TABLE `hraci` (`id` INTEGER PRIMARY KEY ,`meno` VARCHAR( 50 ) NOT NULL ,`priezvisko` VARCHAR( 50 ) NOT NULL ,`vek` INTEGER NOT NULL ,`respekt` REAL NOT NULL) ;");
+		db.execSQL("CREATE TABLE `hraci` (`id` INTEGER PRIMARY KEY ,`meno` VARCHAR( 50 ) NOT NULL ,`priezvisko` VARCHAR( 50 ) NOT NULL ,`vek` INTEGER NOT NULL ,`respekt` REAL NOT NULL) ;");
+	}
+
+	public void inicializujToken() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		db.execSQL("CREATE TABLE `token` (`id` INTEGER PRIMARY KEY ,`token` VARCHAR( 500 ) NOT NULL ,`login` VARCHAR( 50 ) NOT NULL )  ;");
 	}
 
 	public void inicializujTreningoovuDB() {
 		SQLiteDatabase db = this.getReadableDatabase();
-		db
-				.execSQL("CREATE TABLE `treningy` (`id` Integer Primary Key Autoincrement, `datum` Text NOT NULL , `popis` TEXT NOT NULL , `pocetkurtov` INT NOT NULL , `hraci` INT NOT NULL , `zapasy` INT NOT NULL  ) ;");
+		db.execSQL("CREATE TABLE `treningy` (`id` Integer Primary Key Autoincrement, `datum` Text NOT NULL , `popis` TEXT NOT NULL , `pocetkurtov` INT NOT NULL , `hraci` INT NOT NULL , `zapasy` INT NOT NULL  ) ;");
 	}
 
 	public void inicializujZapasovuDB() {
 		SQLiteDatabase db = this.getReadableDatabase();
-		db
-				.execSQL("CREATE TABLE \"zapasy\"(     \"id\" Integer Primary Key Autoincrement  ,      \"typ\" Integer  NOT NULL  ,      \"teamA\" Text  NOT NULL  ,      \"teamB\" Text  NOT NULL  ,      \"datum\" Text  NOT NULL  ,      \"vysledok\" Integer  NOT NULL  ,      \"vytaz\" Integer  NOT NULL  );");
+		db.execSQL("CREATE TABLE \"zapasy\"(     \"id\" Integer Primary Key Autoincrement  ,      \"typ\" Integer  NOT NULL  ,      \"teamA\" Text  NOT NULL  ,      \"teamB\" Text  NOT NULL  ,      \"datum\" Text  NOT NULL  ,      \"vysledok\" Integer  NOT NULL  ,      \"vytaz\" Integer  NOT NULL  );");
 	}
 
 	public void pridajHraca(Hrac novy) {
@@ -59,6 +64,19 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		cv.put("vek", novy.getVek());
 		cv.put("respekt", novy.getRespekt());
 		db.insert("hraci", "id", cv);
+		cv.clear();
+		db.close();
+	}
+
+	public void pridajToken(String novy, String novyLogin) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		ContentValues cv = new ContentValues();
+		// cv.put("id", 1);
+		cv.put("token", novy);
+		cv.put("login", novyLogin);
+		
+		db.insert("token", "id", cv);
+
 		cv.clear();
 		db.close();
 	}
@@ -88,12 +106,29 @@ public class sqlPomoc extends SQLiteOpenHelper {
 				new String[] {});
 		Hrac novy;
 		cursor.moveToFirst();
-		novy = new Hrac(Integer.parseInt(cursor.getString(0)), cursor
-				.getString(1), cursor.getString(2), Integer.parseInt(cursor
-				.getString(3)), Double.parseDouble(cursor.getString(4)));
+		novy = new Hrac(Integer.parseInt(cursor.getString(0)),
+				cursor.getString(1), cursor.getString(2),
+				Integer.parseInt(cursor.getString(3)),
+				Double.parseDouble(cursor.getString(4)));
 		cursor.close();
 		db.close();
 		return novy;
+	}
+
+	public String getToken() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cursor = db.rawQuery("SELECT token, login FROM `token`", new String[] {});
+		String result= new String();
+		if (cursor.moveToFirst()) result = cursor.getString(0)+"/"+cursor.getString(1);
+		else {
+			cursor.close();
+			db.close();
+			return null;
+		}
+		
+		cursor.close();
+		db.close();
+		return result;
 	}
 
 	public Hrac getHraca(int id) {
@@ -102,9 +137,10 @@ public class sqlPomoc extends SQLiteOpenHelper {
 				+ id + "' ", new String[] {});
 		Hrac novy;
 		cursor.moveToFirst();
-		novy = new Hrac(Integer.parseInt(cursor.getString(0)), cursor
-				.getString(1), cursor.getString(2), Integer.parseInt(cursor
-				.getString(3)), Double.parseDouble(cursor.getString(4)));
+		novy = new Hrac(Integer.parseInt(cursor.getString(0)),
+				cursor.getString(1), cursor.getString(2),
+				Integer.parseInt(cursor.getString(3)),
+				Double.parseDouble(cursor.getString(4)));
 		cursor.close();
 		db.close();
 		return novy;
@@ -134,12 +170,14 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		} else
 			typ = 2;
 		// chyba doiplementovat iny typ...
-
+		DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		Cursor cursor = db.rawQuery("SELECT id FROM `zapasy` WHERE `typ` = '"
 				+ typ + "' AND `teamA` = '" + teamA + "' AND `teamB` = '"
-				+ teamB + "' AND `datum` = '" + z.getDatum().toString() + "' ",
+				+ teamB + "' AND `datum` = '" + df.format(z.getDatum()) + "' ",
 				new String[] {});
+
 		cursor.moveToFirst();
+
 		int result = Integer.parseInt(cursor.getString(0));
 		cursor.close();
 		db.close();
@@ -154,7 +192,8 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		return null;
 	}
 
-	public Zapas getZapas(int id, ArrayList<Hrac> hraci) {
+	public Zapas getZapas(int id, ArrayList<Hrac> hraci) throws ParseException {
+
 		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.rawQuery("SELECT * FROM `zapasy` WHERE `id` = '"
 				+ id + "' ", new String[] {});
@@ -169,7 +208,8 @@ public class sqlPomoc extends SQLiteOpenHelper {
 			// Dvojhra novy= new Dvojhra( hraci.get, Hrac2, vytaz, nvysledok)
 			int idA = Integer.parseInt(cursor.getString(2));
 			int idB = Integer.parseInt(cursor.getString(3));
-			Date datum = new Date(cursor.getString(4));// ?E?
+			DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+			Date datum = df.parse(cursor.getString(4));// ?E?
 			int vysledok = Integer.parseInt(cursor.getString(5));
 			int vytaz = Integer.parseInt(cursor.getString(6));
 			novy = new Dvojhra(najdiHracavDB(hraci, idA), najdiHracavDB(hraci,
@@ -180,7 +220,6 @@ public class sqlPomoc extends SQLiteOpenHelper {
 
 		cursor.close();
 		db.close();
-
 		return novy;
 	}
 
@@ -201,6 +240,12 @@ public class sqlPomoc extends SQLiteOpenHelper {
 	public void vycistiHracskuDB() {
 		SQLiteDatabase db = this.getReadableDatabase();
 		db.execSQL("delete from hraci; ");
+		db.close();
+	}
+	
+	public void vycistitokenDB() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		db.execSQL("delete from token; ");
 		db.close();
 	}
 
@@ -241,7 +286,8 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		cv.put("typ", typ);
 		cv.put("teamA", teamA);
 		cv.put("teamB", teamB);
-		cv.put("datum", z.getDatum().toString());
+		DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		cv.put("datum", df.format(z.getDatum()));
 		cv.put("vysledok", z.getVysledok());
 		cv.put("vytaz", z.getVytaz());
 		db.insert("zapasy", "id", cv);
@@ -258,12 +304,19 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		for (Hrac h : trening.getHracov()) {
 			hraci.append(h.getId() + "/");
 		}
-
-		cv.put("datum", trening.getDatumTreningu().toString());
+		DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		cv.put("datum", df.format(trening.getDatumTreningu()));
 		cv.put("popis", trening.getPopisTreningu());
 		cv.put("pocetkurtov", trening.getPocetKurtov());
 		cv.put("hraci", hraci.toString());
 		cv.put("zapasy", zapasyString.toString());
 		db.insert("treningy", "id", cv);
+	}
+
+	public void vymazTrening(int id) {
+		// TODO Auto-generated method stub
+		SQLiteDatabase db = this.getWritableDatabase();
+
+		db.delete("treningy", "id =?", new String[] { Integer.toString(id) });
 	}
 }

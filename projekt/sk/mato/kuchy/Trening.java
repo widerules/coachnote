@@ -311,11 +311,10 @@ public class Trening {
 		return result.toString();
 	}
 
-	public void pridajHracovText(StringBuffer text, ArrayList<Hrac> DB) {
+	public void zmenHracovText(StringBuffer text, ArrayList<Hrac> DB) {
 		// TODO Auto-generated method stub
 		String mena = text.toString();
 		ArrayList<Hrac> novyHraci = new ArrayList<Hrac>();
-		novyHraci = this.hraci;
 
 		String[] menoPriez = mena.split("\n");
 		for (String i : menoPriez) {
