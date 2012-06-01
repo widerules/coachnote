@@ -1,0 +1,20 @@
+=Cieľ projektu=
+
+Tvorba aplikácie pre android a k nej webovské rozhranie, ktoré budú umožňovať jednoduchú správu, Badmintonových(a iných individuálnych športov) tréningov, ich následné spracovanie pre potreby trénerov, pripadne koordináciu treningov medzi trénermi.
+
+==Android app. :==
+ * zápis dochádzky treningu
+ * generovanie zápasov podla aktuálneho rebríčku, poctu ihrísk a počtu hráčov na tréningu
+ * zadanie výsledkov zápasov, aktulizácia poradia v rebríčku
+ * vedenie stručných poznámok o vedení tréningu(precvičovaná technika, ťažko namáhané svaly)
+ * automatická/manuálna synchronizácia s webovským rozhraním
+
+==webovske rozhranie :==
+
+ * ako neprihlásený user
+    # prezeranie štatistiky tj. Aktuálneho rebríčku hráčov, zápasy odohrané na  určitom tréningu, alebo určitým hráčom
+    # možnosť nahlásenia chyby, či podnetu
+ * ako prihlásený user(Tréner)
+     # všetky možnosti ktoré obsahuje aplikácia v telefóne(nutnosť autentifikacie podla mena/hesla)
+     # oprava chybných zápisov
+     # export dát do "tlačiteľných" formátov, hlavne dochádzka hráčov
