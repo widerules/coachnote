@@ -1,0 +1,22 @@
+<div id="login">
+
+<a href="#" class="button" onclick="javascript:showElement('v-menu')">
+<span>Login</span>
+</a>
+<div id="v-menu" class="v-menu" >
+<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post" name="form1" >
+<table border="0" cellspacing="0" cellpadding="0">
+<tr><th>username:</th>
+<td><input name="username" type="text" value="<?php if (isset($_POST['username'])) echo $_POST['username']; ?>" size="20" maxlength="20" /></td></tr>
+<tr><th>heslo:</th>
+<td><input name="heslo" type="password" size="20" maxlength="20" /></td></tr>
+<tr><td>&nbsp;</td><td><input name="submit" type="submit" id="submit" value="Prihlás" /></td></tr>
+</table>
+</form>
+<a href="<?php echo $_SERVER['PHP_SELF']; ?>?p=reg3" > Registracia hraca </a> |
+<a href="<?php echo $_SERVER['PHP_SELF']; ?>?p=reg1" > Registracia noveho trenera </a> |
+<a href="<?php echo $_SERVER['PHP_SELF']; ?>?p=reg2" > Registracia Klubu </a>
+</div>
+</div>
+
+<div> <br /> <br /> <br /> Vzladom na osobne udaje je potreba sa prihlasit!</div>
