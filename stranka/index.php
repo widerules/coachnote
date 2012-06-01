@@ -9,12 +9,43 @@ include('funkcie.php');
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 <link type="text/css" rel="stylesheet" media="all" href="style.css" />
 <link href="style.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="java.js"></script>
+
+<script type="text/javascript" src="./js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="./js/jquery.table.addrow.js"></script> <!-- tables -->
 <script type="text/javascript">
-<!--//--><![CDATA[//><!--
-jQuery.extend(Drupal.settings, { "basePath": "/", "dhtmlMenu": { "slide": "slide", "children": "children", "clone": "clone", "siblings": 0, "relativity": 0, "doubleclick": 0 } });
-//--><!]]>
+$("document").ready(function(){
+	$(".addRow").btnAddRow({rowNumColumn:"rowNumber"});
+	$(".delRow").btnDelRow();
+});
 </script>
+<script type="text/javascript">
+function erase1()
+{
+document.getElementById('pocKurtov').value="";
+}
+
+function erase2()
+{
+document.getElementById('popis').value="";
+}
+</script>
+
+<!-- datepick -->
+<link href="js/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<script src="js/jquery-ui.min.js"></script>
+<!-- datepicker -->
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#datepicker").datepicker();
+  });
+  
+    $(document).ready(function() {
+    $("#datepicker2").datepicker();
+  });
+</script>	
+<!-- datepick -->
+<script language="javascript" type="text/javascript" src="datetimepicker.js"></script>`
+
 <title>Coach note's - Všetko čo trener potrebuje...</title>
 </head>
 <body>
@@ -35,74 +66,14 @@ jQuery.extend(Drupal.settings, { "basePath": "/", "dhtmlMenu": { "slide": "slide
 		<div id="center">
 				<?php
 		if (( $_GET['p']=='home' ) || (!(isset($_GET['p']))) ) { 
-		?>
-			
-		  <div class="right">
-				
-				<p class="text1">
-					<strong>Čo to je?</strong>...Ročníkovy projekt <br /><br />
-					
-					<strong>Cieľ projektu</strong><br />
-					Tvorba aplikácie pre android a k nej webovské rozhranie, ktoré budú umožňovať jednoduchú správu, Badmintonových(a iných individuálnych športov) tréningov, ich následné spracovanie pre potreby trénerov, pripadne koordináciu treningov medzi trénermi.<br />			<a href="http://code.google.com/p/coachnote/" target="_blank" class="more"> Viac na code.google</a>					
-				</p>
-				<div class="dots"><img src="images/spacer.gif" alt="" width="580" height="1" /></div>
-				
-				<div class="dots2">
-				
-				
-					<div class="left">
-					<p class="text2">
-						<strong>Android app. :</strong></p>
-						<div class="clearfix"></div>
-						<br />
-						<ul>
-							<li>zápis dochádzky treningu</li>
-							<li>generovanie zápasov podla aktuálneho rebríčku, poctu ihrísk a počtu hráčov na tréningu</li>
-							<li>zadanie výsledkov zápasov, aktulizácia poradia v rebríčku</li>
-							<li>vedenie stručných poznámok o vedení tréningu(precvičovaná technika, ťažko namáhané svalstvo)</li>
-							<li>automatická/manuálna synchronizácia s webovským rozhraním</li>					
-							<li> <a href="klient/Trening.apk" > prva funkcna vezia klienta! </a> </li>
-						</ul>
-										
-					
-					</div>
-					
-					<div class="second">
-	
-						<p class="text2">
-							<strong>webovske rozhranie :</strong> 
-						</p>
-						<div class="clearfix"></div>
-						<br />
-						
-					
-						<ul>
-							<li>ako neprihlásený user
-							<ul>
-							<li>prezeranie štatistiky tj. Aktuálneho rebríčku hráčov, zápasy odohrané na určitom tréningu, alebo určitým hráčom</li>
-							<li>možnosť nahlásenia chyby, či podnetu</li>
-							</ul>
-							</li>
-							<li>ako prihlásený user(Tréner) <ul>
-							<li>-všetky možnosti ktoré obsahuje aplikácia v telefóne(nutnosť autentifikacie podla mena/hesla)</li>
-							<li>oprava chybných zápisov</li>			
-							<li>export dát do "tlačiteľných" formátov, hlavne dochádzka hráčov</li>				
-							</ul></li>				
-						</ul>
-						
-						
-					</div>
-				</div>
-				
-			</div>
-			<div class="clearfix"></div>
-		<?php
+		include('inc/about.html');
 		}
 		if ( $_GET['p']=='system' ) {
 		?>		
 		<div class="right">
 		
 		<?php 	
+		//prihlasovanie
 			if (isset($_POST['username']) && ($_POST['username'] != "") && isset($_POST['heslo']) && ($_POST['heslo'] != "")) {
 if ($link = prihlas_sql()) {
 	$sql = "SELECT * FROM `trening_user` WHERE login='" . $_POST['username'] . "' AND heslo=MD5('" . $_POST['heslo'] . "') LIMIT 1;";
@@ -110,9 +81,11 @@ if ($link = prihlas_sql()) {
 	$result = mysql_query($sql, $link);
 	if ($result) {
 		if ($row = mysql_fetch_assoc($result)) {
+			$_SESSION['id'] = $row['id'];
 			$_SESSION['username'] = $row['login']; 
 			$_SESSION['prava'] = $row['prava'];
 			$_SESSION['token'] = $row['token']; 
+			$_SESSION['klub'] = $row['klub'];
 		}
 		mysql_free_result($result);
 	} else {
@@ -121,107 +94,208 @@ if ($link = prihlas_sql()) {
 }
 else { 
 	echo '<p style="color: #FF0000;">Nepodarilo sa spojiť s databázou</p>';
-} // end spojenie s db
-
-} elseif (isset($_POST['submit2'])) { // IF isset username, heslo
+} // end prihlasovanie
+//odhlasenie
+} elseif (isset($_POST['logout'])) { 
   $_SESSION = array();
   session_destroy();
 }
+//odhlasenie end
 if (!(isset($_SESSION['username']) && ($_SESSION['username'] != ""))) {
-?>
-<div>Pre pouzivanie/prezeranie sa musite najprv prihlasit</div>
-<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post" name="form1">
-<table border="0" cellspacing="0" cellpadding="0">
-<tr><th>username:</th>
-<td><input name="username" type="text" value="<?php if (isset($_POST['username'])) echo $_POST['username']; ?>" size="20" maxlength="20" /></td></tr>
-<tr><th>heslo:</th>
-<td><input name="heslo" type="password" size="20" maxlength="20" /></td></tr>
-<tr><td>&nbsp;</td><td><input name="submit" type="submit" id="submit" value="Prihlás" /></td></tr>
-</table>
-</form>
-<?php
+	include('inc/login_form.html');
 }
-else {
-// pouzivatel je prihlaseny
-  echo '<div>Vitaj v systéme!<b> ' . $_SESSION['username'] . ' ' . '</b></div>';
-?>
 
-<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post" name="form1">
-<input name="submit2" type="submit" id="submit2" value="Odhlás" />
-</form>  
-<?php  
-    }
+// pouzivatel je prihlaseny
+else {
+   include('inc/logout.html');
+   //content  
+   if (( $_GET['p']=='system') &&  $_GET['a']=='profil'  &&  isset($_GET['id']) && je_cislo($_GET['id']) ) {
+     //ak sa pozera na niekoho profil kazdy ma pristup ku hoci ktoremu proflilu na st. nahlad
+     profil_hraca($_GET['id']);
+     echo '<a href="'.$_SERVER['PHP_SELF'].'?p=system"' .' >BACK</a>';
+   	}
+   elseif (( $_GET['p']=='system') &&  $_GET['a']=='vypis'  &&  isset($_GET['id']) && je_cislo($_GET['id']) ) {
+     //nekuka na vlastny home ale na vypis treningov kukat moze kadzy vypis
+		vypisTRening($_GET['id']);
+   	}	
+   //ak prezera standardny home
+   else { include ('inc/content.php');}
+}
 ?>
 <br />	
 		
-		<!-- android upload veci! -->
-			<?php
-			 if ( isset($_POST['ntrening']) ) {
-			 	//insertDatum($_POST['datum']);//nenakodena ta fcia a tokodovanie je dajake zle
-//			 	$_POST['datum'] $_POST['pocetKurtov'] $_POST['poznamka']
-				$dochadzka="";
-				$zapasy="";
-				echo 'pocet:'.$_POST['pocet_h'];
-				for( $i=0; $i <intval($_POST['pocet_h']); $i++  ) {
-					$meno='meno_'.$i;
-					$priezvisko='priezvisko_'.$i;
-					
-					$id=dajIdHraca($_POST[$meno],	$_POST[$priezvisko]);
-					
-					
-					if ( $id>0 ) {
-						$dochadzka = $id.'/'.$dochadzka;
-						}
-					}
+
+		</div>
+     
+		<?php
+		}
+		
+
+		
 				
-				for( $i=0; $i <intval($_POST['pocet_z']); $i++  ) {
-					$ameno='ameno_'.$i;
-					$apriezvisko='apriezvisko_'.$i;
-					$bmeno='bmeno_'.$i;
-					$bpriezvisko='bpriezvisko_'.$i;
-					$vysledok='vysledok_'.$i;
+			
+				if (( $_GET['p']=='andr' ) && ( isset($_GET['p']) ) ) {			
+				
+			//este treba pridat token pre okontrolovanie ci to dava ten ktori hrac+pridat do DB treningov:
+			// kto viedol trening+ kto trening submitoval+kedy
+					//hracska DB
 					
-					$aid=dajIdHraca($_POST[$ameno],	$_POST[$apriezvisko]);
-					$bid=dajIdHraca($_POST[$bmeno],	$_POST[$bpriezvisko]);
+				//kontrolny button 
+				if ((isset($_POST['token'])) && isset($_POST['login']) && (getToken($_POST['login']) == $_POST['token'] ) && ($_POST['kontrola']=='ano') ){
+					echo '<div id="odpoved">kontrola udajov uspesna!</div>';
+					}					
+					else echo '<div id="odpoved">zle zadany token/login<div>';
 					
-					echo 'meno: '.$_POST[$ameno].'   priez: '.$_POST[$apriezvisko];
-					echo '    id:'.$aid;
-																				
-					if (($aid>0) && ($bid>0)) {
-					 $zapasy = $aid.' '. $bid.' '. $_POST[$v].' '. $_POST[$vysledok]. '/'. $zapasy;
-					 }
-									
-					}
-			 pridajTRening($_POST['datum'], $_POST['poznamka'],  $_POST['pocetKurtov'], $dochadzka, $zapasy);
-			 	}
-			 	if ( isset($_POST['nhraci']) ) {
-			 		//echo 'pocet: '.intval($_POST['pocet_h']);
+				//preberanie udajov					
+				if ((isset($_POST['token'])) && isset($_POST['login']) && (getToken($_POST['login']) == $_POST['token'] ) && ($_POST['udaje']=='ano')  ){
+					
+					
+			 	if ( isset($_POST['hraci']) ) {
+			 		for( $i=0; $i < intval($_POST['pocet_h']); $i+=1  ) {			 			
 			 		
-			 		for( $i=0; $i < intval($_POST['pocet_h']); $i+=1  ) {
-			 			
+			 		$id='id_'.$i;	
 					$meno='meno_'.$i;
 					$priezvisko='priezvisko_'.$i;
 
 					$vek='vek_'.$i;
 					$respekt='respekt_'.$i;					
 					
-					insertnovyhrac($_POST[$meno],$_POST[$priezvisko],$_POST[$vek],$_POST[$respekt] );
-					echo $i;
+					insertnovyhractemp($_POST[$id],$_POST[$meno],$_POST[$priezvisko],$_POST[$vek],$_POST[$respekt] );
 					}
-			 		}
+		 		}			
+					
+			if ( isset($_POST['zapasy']) ) {
+				for( $i=0; $i < intval($_POST['pocet_z']); $i+=1  ) {
+						$id='id_'.$i;
+						$typ='typ_'.$i;
+						$teamA='teamA_'.$i;
+						$teamB='teamB_'.$i;
+						$datum='datum_'.$i;
+						$vysledok='vysledok_'.$i;
+						$vytaz='vytaz_'.$i;
+						
+						pridajzapastemp($_POST[$id],$_POST[$typ],$_POST[$teamA],$_POST[$teamB],$_POST[$datum],$_POST[$vysledok],$_POST[$vytaz]);
+					}	
+				}
+			//ok
+			 if ( isset($_POST['treningy']) ) {
+					//ok	 	
+			 	//insertnovyhrac('fcia', 'fcia', $_POST['pocet_t'], 1);
+				for( $i=0; $i < intval($_POST['pocet_t']); $i+=1  ) {
+					//insertnovyhrac($_POST['zapasy_'.$i], $_POST['hraci_'.$i], 2, 1);
+				if (!kotrolaDuplicityTreningu($_POST['datum_'.$i], $_POST['uid_'.$i]))   //ak trening s takimto uid mam v BD tak ho tam nepridam
+				{ 
+			 pridajTReningtemp($_POST['datum_'.$i], $_POST['poznamka_'.$i],
+			   $_POST['pocetKurtov_'.$i], $_POST['hraci_'.$i], $_POST['zapasy_'.$i] , loginToId($_POST['login']), $_POST['uid_'.$i] );
+			   }
+			   else insertnovyhrac("duplicitar!", $_POST['hraci_'.$i], 2, 1);
+			   
+			 }
+			 
+			 //srotenie
+			 novyHrac();
+			 vyriesKonflikty();
+			 nahod();
+			 vycistiTempDb();
+			 //povipisuj svoj stav..
+			 
+			
+		//	 echo '<p id="odpovedTReningyDb">';
+			 
+			// vypisujTReningydb();
+			echo '<p id="odpovedTReningyDb"> ';
+			vypisujTReningydb();
+			echo '</p>';
+		//	echo '</p>';
+			 
+			 			 
+}			 	
+ 		
+ 		}
+
+ 	}
 			?>
-			<!-- android upload veci! -->
-		</div>
-     
+			<!-- android upload veci! -->		
 		<?php
+		//registracia trenera
+		if (( $_GET['p']=='reg1' ) && ( isset($_GET['p']) ) ) { 
+		if (isset($_POST["login1"]) && kotrolatextu($_POST["login1"]) && 
+			 isset($_POST["meno"]) && kontrolameno($_POST["meno"]) &&
+			 isset($_POST["email"]) && kontrolaemail($_POST["email"]) &&
+			 isset($_POST["pass"])  && kontrolaheslo($_POST["pass"]) &&
+			 isset($_POST["suhlas"]) && isset($_POST["klub"])
+				) { 
+				if (!duplicitaTrenera($_POST["login1"], $_POST["email"])) 	$_POST["chyba"]='1';	
+				else {
+					registrujTrenera($_POST["login1"], $_POST["meno"], $_POST["email"], $_POST["pass"], $_POST["klub"]);
+					echo "<h2> odoslane! pre spravne pozivanie mobilnej applikacie si prosim skotrolujte email!</h2>";
+					token($_POST["email"]);
+					}
+				}
+		//formular pre registraciu
+		include('inc/form_reg_trener.php');
+		
 		}
-		?>	
-		  <div id="footer">
+		
+		//registracia hraca
+		if (( $_GET['p']=='reg3' ) && ( isset($_GET['p']) )) { 
+		if (isset($_POST["login1"]) && kotrolatextu($_POST["login1"]) && 
+			 isset($_POST["menosel"]) &&
+			 isset($_POST["email"]) && kontrolaemail($_POST["email"]) &&
+			 isset($_POST["pass"])  && kontrolaheslo($_POST["pass"]) &&
+			 isset($_POST["suhlas"]) && isset($_POST["klub"])
+				) { 
+				if (!duplicitaTrenera($_POST["login1"])) 	$_POST["chyba"]='1';	
+				else {
+					registrujHraca($_POST["login1"], $_POST["meno"], $_POST["email"], $_POST["pass"], $_POST["klub"]);
+					echo "<h2> odoslane! pre spravne pozivanie mobilnej applikacie si prosim skotrolujte email!</h2>";
+					token($_POST["email"]);
+					}
+				}	
+		//formular pre registraciu
+		include('inc/form_reg_hrac.php');
+		}
+		//registracia klubu
+		if (( $_GET['p']=='reg2' ) && ( isset($_GET['p']) )) { 
+				if (isset($_POST["login1"]) && kotrolatextu($_POST["login1"]) && 
+			 isset($_POST["meno"]) && kontrolameno($_POST["meno"]) &&
+			 isset($_POST["email"]) && kontrolaemail($_POST["email"]) &&
+			 isset($_POST["pass"])  && kontrolaheslo($_POST["pass"]) &&
+			 isset($_POST["suhlas"]) && 
+			 isset($_POST["menok"]) && kontrolameno($_POST["menok"]) &&
+			 isset($_POST["sport"]) && kontrolameno($_POST["sport"])  
+				) { 
+				if (!duplicitaTrenera($_POST["login1"])) 	$_POST["chyba"]='1';	
+				else {
+					echo "<h2> odoslane!  pre pozivanie mobilnej applikacie si prosim skotrolujte email! </h2>"; 
+					registrujKlub($_POST["menok"],$_POST["sport"]);
+					$novyklub=najdiklub($_POST["menok"]);
+					$prava=46;
+					registrujTrenera($_POST["login1"], $_POST["meno"], $_POST["email"], $_POST["pass"], $novyklub, $prava);
+					$superUser=najdiTrenera($_POST["login1"]);
+					updateKlub($novyklub,$superUser);
+					//mail
+					token($_POST["email"]);
+					}
+				}
+				
+		//formular pre registraciu
+		include('inc/form_reg_klub.php');
+		}
+		
+		if ( isset($_GET['pridajToken']) ) {
+			 
+		echo 'vas token: '.potvrdenie($_GET['pridajToken']);
+		}
+		?>		
+					
+
+		  <!-- <div id="footer">
 				<p>
 					coded by <a href="www.st.fmph.uniba.sk/~kuchynar1/">Martin Kuchyňár</a> <br />
 					<a href="http://www.gnu.org/licenses/gpl.html">Licence</a>
 				</p> 
-			</div>
+			</div> -->
 		</div>
 
 	</div>
