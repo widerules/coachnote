@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -47,7 +48,7 @@ public class sqlPomoc extends SQLiteOpenHelper {
 
 	public void inicializujTreningoovuDB() {
 		SQLiteDatabase db = this.getReadableDatabase();
-		db.execSQL("CREATE TABLE `treningy` (`id` Integer Primary Key Autoincrement, `datum` Text NOT NULL , `popis` TEXT NOT NULL , `pocetkurtov` INT NOT NULL , `hraci` INT NOT NULL , `zapasy` INT NOT NULL  ) ;");
+		db.execSQL("CREATE TABLE `treningy` (`id` Integer Primary Key Autoincrement, `datum` Text NOT NULL , `popis` TEXT NOT NULL , `pocetkurtov` INT NOT NULL , `hraci` INT NOT NULL , `zapasy` INT NOT NULL  , uid Text NOT NULL  ) ;");
 	}
 
 	public void inicializujZapasovuDB() {
@@ -68,13 +69,28 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		db.close();
 	}
 
+	public void pridajHracaRaw(String id, String meno, String priezvisko,
+			String respekt, String vek) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		ContentValues cv = new ContentValues();
+		cv.put("id", id);
+		cv.put("meno", meno);
+		cv.put("priezvisko", priezvisko);
+		cv.put("vek", vek);
+		cv.put("respekt", respekt);
+
+		db.insert("hraci", "id", cv);
+		cv.clear();
+		db.close();
+	}
+
 	public void pridajToken(String novy, String novyLogin) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues cv = new ContentValues();
 		// cv.put("id", 1);
 		cv.put("token", novy);
 		cv.put("login", novyLogin);
-		
+
 		db.insert("token", "id", cv);
 
 		cv.clear();
@@ -117,15 +133,17 @@ public class sqlPomoc extends SQLiteOpenHelper {
 
 	public String getToken() {
 		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cursor = db.rawQuery("SELECT token, login FROM `token`", new String[] {});
-		String result= new String();
-		if (cursor.moveToFirst()) result = cursor.getString(0)+"/"+cursor.getString(1);
+		Cursor cursor = db.rawQuery("SELECT token, login FROM `token`",
+				new String[] {});
+		String result = new String();
+		if (cursor.moveToFirst())
+			result = cursor.getString(0) + "/" + cursor.getString(1);
 		else {
 			cursor.close();
 			db.close();
 			return null;
 		}
-		
+
 		cursor.close();
 		db.close();
 		return result;
@@ -154,6 +172,24 @@ public class sqlPomoc extends SQLiteOpenHelper {
 				new String[] {});
 		cursor.moveToFirst();
 		return Integer.parseInt(cursor.getString(0));
+	}
+
+	public boolean kontrolaDuplicityTreningu(String uid) {
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cursor = db.rawQuery(
+				"SELECT id FROM `treningy` WHERE `uid` LIKE '" + uid + "' ",
+				new String[] {});
+
+		boolean result = true;
+		if (cursor.moveToFirst())
+			result = false;
+		else {
+			cursor.close();
+			db.close();
+			result = true;
+		}
+
+		return result;
 	}
 
 	public int getIdZapasu(Zapas z) {
@@ -208,7 +244,7 @@ public class sqlPomoc extends SQLiteOpenHelper {
 			// Dvojhra novy= new Dvojhra( hraci.get, Hrac2, vytaz, nvysledok)
 			int idA = Integer.parseInt(cursor.getString(2));
 			int idB = Integer.parseInt(cursor.getString(3));
-			DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+			DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 			Date datum = df.parse(cursor.getString(4));// ?E?
 			int vysledok = Integer.parseInt(cursor.getString(5));
 			int vytaz = Integer.parseInt(cursor.getString(6));
@@ -236,13 +272,27 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		db.close();
 		return novy;
 	}
+	
+	
 
 	public void vycistiHracskuDB() {
 		SQLiteDatabase db = this.getReadableDatabase();
 		db.execSQL("delete from hraci; ");
 		db.close();
 	}
-	
+
+	public void vycistiTreningovuDB() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		db.execSQL("delete from treningy; ");
+		db.close();
+	}
+
+	public void vycistiZapasovuDB() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		db.execSQL("delete from Zapasy; ");
+		db.close();
+	}
+
 	public void vycistitokenDB() {
 		SQLiteDatabase db = this.getReadableDatabase();
 		db.execSQL("delete from token; ");
@@ -296,6 +346,27 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		db.close();
 	}
 
+	public void pridajZapasRaw(String id, String typ, String teamA,
+			String teamB, String datum, String vytaz, String vysledok) {
+		// TODO Auto-generated method stub
+		SQLiteDatabase db = this.getWritableDatabase();
+		ContentValues cv = new ContentValues();
+
+		cv.put("id", id);
+		cv.put("typ", typ);
+		cv.put("teamA", teamA);
+		cv.put("teamB", teamB);
+		cv.put("datum", datum);
+		cv.put("vysledok", vysledok);
+		cv.put("vytaz", vysledok);
+		db.insert("zapasy", "id", cv);
+
+		cv.clear();
+		db.close();
+		
+		
+	}
+
 	public void pridajTrening(Trening trening, StringBuffer zapasyString) {
 		// TODO Auto-generated method stub
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -310,6 +381,24 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		cv.put("pocetkurtov", trening.getPocetKurtov());
 		cv.put("hraci", hraci.toString());
 		cv.put("zapasy", zapasyString.toString());
+		// String a=UUID.randomUUID().toString();
+		cv.put("uid", UUID.randomUUID().toString()); // pridam identifikator
+														// treningu
+		db.insert("treningy", "id", cv);
+	}
+
+	public void pridajTreningRaw(String datum, String popis, String pocet,
+			String ludia, String zapasy, String uid) {
+		// TODO Auto-generated method stub
+		SQLiteDatabase db = this.getWritableDatabase();
+		ContentValues cv = new ContentValues();
+
+		cv.put("datum", datum);
+		cv.put("popis", popis);
+		cv.put("pocetkurtov", pocet);
+		cv.put("hraci", ludia);
+		cv.put("zapasy", zapasy);
+		cv.put("uid", uid);
 		db.insert("treningy", "id", cv);
 	}
 
@@ -318,5 +407,12 @@ public class sqlPomoc extends SQLiteOpenHelper {
 		SQLiteDatabase db = this.getWritableDatabase();
 
 		db.delete("treningy", "id =?", new String[] { Integer.toString(id) });
+	}
+
+	public void vymazZapas(int id) {
+		// TODO Auto-generated method stub
+		SQLiteDatabase db = this.getWritableDatabase();
+
+		db.delete("zapasy", "id =?", new String[] { Integer.toString(id) });
 	}
 }

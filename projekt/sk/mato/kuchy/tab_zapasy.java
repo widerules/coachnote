@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -83,20 +84,41 @@ public class tab_zapasy extends Activity {
 	private boolean vypisuj() {
 		zoznam = new ScrollView(this);
 		linLay = new LinearLayout(this);
+		
 		linLay.setOrientation(LinearLayout.VERTICAL);
 		zoznam.addView(linLay);
+		
 
 		// pozor mozna chyba pri deletovani hraca co uz ma zapas to urcite
 		// spadne!
 
-		if (trening.getZapasy().size() < 1)
+	/*	if (trening.getZapasy().size() < 1)
 			trening.generujZapasy();
-		//natotok by osm pridal tlacitko
+		//natotok by osm pridal tlacitko*/
 
+		
+		
 		TextView rebricek = new TextView(this);
 		rebricek.setText("Akutalny rebricek:\n" + trening.vypisRebricek());
-		linLay.addView(rebricek);
+		//linLay.addView(rebricek);
+		
+		Button zadajZapas= new Button(this);
+		zadajZapas.setText("zadaj vlastny zapas!");
+		zadajZapas.setOnClickListener( new OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(tab_zapasy.this, pridajzapas.class);
+				startActivityForResult(intent, 0);
+			}
+		});
+		
+		
+		LinearLayout vrch= new LinearLayout(this);
+		vrch.addView(rebricek);
+		vrch.addView(zadajZapas);
 
+		linLay.addView(vrch);
 		TextView nadpis = new TextView(this);
 		nadpis.setText("Odporucane zapasy: \n");
 		linLay.addView(nadpis);
@@ -193,7 +215,6 @@ public class tab_zapasy extends Activity {
 				trening.generujZapasy();
 				uloz();
 				vypisuj();
-
 			}
 		});
 
