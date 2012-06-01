@@ -17,11 +17,11 @@ import android.widget.Toast;
 
 public class novyhrac extends Activity {
 
-	private sqlPomoc hraci=new sqlPomoc(this, "hraci", null, 1);
+	private sqlPomoc hraci = new sqlPomoc(this, "hraci", null, 1);
 	private String noveMeno, novePriezvisko;
 	private int novyVek;
 	private Double novyRespekt;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -79,21 +79,26 @@ public class novyhrac extends Activity {
 								.toString());
 					} catch (Exception e) {
 						// TODO: handle exception
-						zobrazchybu.setMessage("Respekt ma byt cislo v tvare x.x kde x je cislo!");
-						zobrazchybu.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-							
-							public void onClick(DialogInterface dialog, int which) {
-								// TODO Auto-generated method stub
-								
-							}
-						});
-						zobrazchybu.setPositiveButton("Nastav na 1.0", new DialogInterface.OnClickListener() {
-							
-							public void onClick(DialogInterface dialog, int which) {
-								// TODO Auto-generated method stub
-								novyRespekt=1.0;
-							}
-						});
+						zobrazchybu
+								.setMessage("Respekt ma byt cislo v tvare x.x kde x je cislo!");
+						zobrazchybu.setPositiveButton("OK",
+								new DialogInterface.OnClickListener() {
+
+									public void onClick(DialogInterface dialog,
+											int which) {
+										// TODO Auto-generated method stub
+
+									}
+								});
+						zobrazchybu.setPositiveButton("Nastav na 1.0",
+								new DialogInterface.OnClickListener() {
+
+									public void onClick(DialogInterface dialog,
+											int which) {
+										// TODO Auto-generated method stub
+										novyRespekt = 1.0;
+									}
+								});
 					}
 
 					return true;
@@ -107,66 +112,52 @@ public class novyhrac extends Activity {
 		Spinner spinner = (Spinner) findViewById(R.id.spinnerVek);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
 				this, R.array.vek_array, android.R.layout.simple_spinner_item);
-		adapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
-		spinner
-				.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-					public void onItemSelected(AdapterView<?> parent,
-							View view, int pos, long id) {
-						novyVek = Integer.parseInt(parent
-								.getItemAtPosition(pos).toString());
-					}
+		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id) {
+				novyVek = Integer.parseInt(parent.getItemAtPosition(pos)
+						.toString());
+			}
 
-					public void onNothingSelected(AdapterView<?> parent) {
-					}
-				});
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
 
 		// odosielacie tlacitko
 		Button button = (Button) findViewById(R.id.ulozHraca);
 		button.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				
+
 				// zapis do suboru...
 				noveMeno = edittext.getText().toString();
 				novePriezvisko = edittext2.getText().toString();
 				novyRespekt = Double
 						.parseDouble(edittext3.getText().toString());
 				/*
-				try {
-					hraci = openFileInput("hraci.xml");
-					hracilist = OXml.nacitajHracov(hraci);
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					finish();
-				}
-				
-				
-				Hrac novy = new Hrac(hracilist.size()+1,noveMeno, novePriezvisko, novyVek,
-						novyRespekt);
-				
-				hracilist.add(novy);
-				
-				try {
-					OXml.zapisHracomNovyrespekt(hracilist);
-					Toast.makeText(getBaseContext(),
-							"Novy hráč úspešne pridany! ", Toast.LENGTH_SHORT)
-							.show();
-					finish();
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalStateException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				*/
-				hraci.pridajHraca(new Hrac(hraci.dajCeluDb().size()+1,noveMeno, novePriezvisko, novyVek,
-						novyRespekt));
+				 * try { hraci = openFileInput("hraci.xml"); hracilist =
+				 * OXml.nacitajHracov(hraci); } catch (FileNotFoundException e)
+				 * { // TODO Auto-generated catch block e.printStackTrace();
+				 * finish(); }
+				 * 
+				 * 
+				 * Hrac novy = new Hrac(hracilist.size()+1,noveMeno,
+				 * novePriezvisko, novyVek, novyRespekt);
+				 * 
+				 * hracilist.add(novy);
+				 * 
+				 * try { OXml.zapisHracomNovyrespekt(hracilist);
+				 * Toast.makeText(getBaseContext(),
+				 * "Novy hráč úspešne pridany! ", Toast.LENGTH_SHORT) .show();
+				 * finish(); } catch (IllegalArgumentException e) { // TODO
+				 * Auto-generated catch block e.printStackTrace(); } catch
+				 * (IllegalStateException e) { // TODO Auto-generated catch
+				 * block e.printStackTrace(); } catch (IOException e) { // TODO
+				 * Auto-generated catch block e.printStackTrace(); }
+				 */
+				hraci.pridajHraca(new Hrac(hraci.dajCeluDb().size() + 1,
+						noveMeno, novePriezvisko, novyVek, novyRespekt));
 				finish();
 			}
 		});

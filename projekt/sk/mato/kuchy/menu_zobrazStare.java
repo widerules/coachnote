@@ -1,5 +1,5 @@
 package sk.mato.kuchy;
-//Log.i(Constants._ID, novy.getTeamA().getPriezvisko());
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +27,8 @@ public class menu_zobrazStare extends Activity {
 	private LinearLayout linlay;
 	private TextView statystiky;
 
+	// private String uId;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -47,12 +49,11 @@ public class menu_zobrazStare extends Activity {
 		int novyPocetKurtov = 0;
 		ArrayList<Zapas> noveZapasy = new ArrayList<Zapas>();
 		ArrayList<Hrac> novyHraci = new ArrayList<Hrac>();
-		
+
 		DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		// aj to bude iba jeden treining...
 		for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
 
-			
 			try {
 				novyDatumTreningu = df.parse(cursor.getString(1));
 			} catch (ParseException e1) {
@@ -65,26 +66,30 @@ public class menu_zobrazStare extends Activity {
 
 			String[] hraciString = cursor.getString(4).split("/");
 			for (int i = 0; i < hraciString.length; i++) {
-				try{
-					novyHraci.add(dbhracov.getHraca(Integer.parseInt(hraciString[i])));
-				}catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}	
-			}
-
-			String[] zapasyString = cursor.getString(5).split("/");
-			
-			Log.i(Constants._ID, zapasyString.length+"");
-			
-			for (int i = 0; i < zapasyString.length; i++) {
-				try{
-					noveZapasy.add(dbzapasy.getZapas(Integer
-							.parseInt(zapasyString[i]), novyHraci));
-				}catch (Exception e) {
+				try {
+					novyHraci.add(dbhracov.getHraca(Integer
+							.parseInt(hraciString[i])));
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}
+			Log.d("zapas", cursor.getString(5));
+			
+			String[] zapasyString = cursor.getString(5).split("/");
+
+			for (int i = 0; i < zapasyString.length; i++) {
+				try {
+					noveZapasy.add(dbzapasy.getZapas(
+							Integer.parseInt(zapasyString[i]), novyHraci));
+					Log.d("zapas", zapasyString[i]);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				// uId = cursor.getString(6);
+				// Log.d("uId", uId);
+
 				// musel byt na tom treningu aby hral dajaky zapas...ak nie
 				// nenajde to a samo sa to v vymaze
 			}
@@ -105,12 +110,17 @@ public class menu_zobrazStare extends Activity {
 
 		statystiky.append("zapasy:\n" + trening.vypisZapasy(-1) + "\n\n");
 
+		// statystiky.append("uId:\n" + uId + "\n\n");
+
 		trening.vytvorRebricek();
 
 		linlay.addView(statystiky);
 		pohlad.addView(linlay);
 		setContentView(pohlad);
-		
+		dbhracov.close();
+		dbtreningy.close();
+		dbzapasy.close();
+
 	}
 
 }

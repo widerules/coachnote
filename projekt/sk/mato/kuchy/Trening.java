@@ -69,6 +69,9 @@ public class Trening {
 		this.zapasy = Zapasy;
 	}
 
+	public void addZapasy(Zapas novy) {
+		this.zapasy.add(novy);
+	}
 
 	public ArrayList<Zapas> getZapasy() {
 		return zapasy;

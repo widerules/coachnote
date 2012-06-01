@@ -193,9 +193,9 @@ public class tab_formular extends Activity {
 		trening.setPocetKurtov(aktualneZadanyPocetKurtov);
 		try {
 			OXml.vytvorNovyTrening(trening);
-			Toast.makeText(getBaseContext(),
+			/*Toast.makeText(getBaseContext(),
 					"Udaje o treningu uspesne ulozene!", Toast.LENGTH_LONG)
-					.show();
+					.show();*/
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Toast.makeText(getBaseContext(), "chyba pri zapisovani suboru!",

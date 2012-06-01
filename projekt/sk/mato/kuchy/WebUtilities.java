@@ -41,7 +41,7 @@ public class WebUtilities {
 		return httpResponse.getEntity();
 	}
 	
-	public static HttpEntity post(String url, List<NameValuePair> data) throws Exception {
+	public static byte[] post(String url, List<NameValuePair> data) throws Exception {
 		// TODO: specific exceptions
 		Log.i(Constants._ID, "Posting to url: " + url);
 		
@@ -59,7 +59,8 @@ public class WebUtilities {
 			throw new Exception("Bad HTTP status code: " + statusCode);
 		}
 		
-		return httpResponse.getEntity();
+		return EntityUtils.toByteArray(httpResponse.getEntity());
+			
 	}
 	
 	public static String getStringFromUrl(String url) throws Exception {

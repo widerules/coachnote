@@ -120,17 +120,17 @@ public class menu_novyTrening extends TabActivity {
 
 		intent = new Intent().setClass(this, tab_hraci.class);
 
-		spec = tabHost.newTabSpec("ludia").setIndicator("",
+		spec = tabHost.newTabSpec("ludia").setIndicator("a",
 				res.getDrawable(R.drawable.ludia)).setContent(intent);
 		tabHost.addTab(spec);
 
 		intent = new Intent().setClass(this, tab_zapasy.class);
-		spec = tabHost.newTabSpec("zapasy").setIndicator("",
+		spec = tabHost.newTabSpec("zapasy").setIndicator("b",
 				res.getDrawable(R.drawable.zapasy)).setContent(intent);
 		tabHost.addTab(spec);
 
 		intent = new Intent().setClass(this, tab_formular.class);
-		spec = tabHost.newTabSpec("poznamky").setIndicator("",
+		spec = tabHost.newTabSpec("poznamky").setIndicator("c",
 				res.getDrawable(R.drawable.form)).setContent(intent);
 		tabHost.addTab(spec);
 
